@@ -53,11 +53,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'bakeflow-erp-mc',
-    authDomain: 'bakeflow-erp-mc.firebaseapp.com',
-    storageBucket: 'bakeflow-erp-mc.appspot.com',
+    apiKey: 'AIzaSyCYekBdWE1tburRNK3EJR5b7_uYH1NGHr8',
+    appId: '1:54002399909:web:6f355b1d930539b2202b4c',
+    messagingSenderId: '54002399909',
+    projectId: 'bakeflow-erp',
+    authDomain: 'bakeflow-erp.firebaseapp.com',
+    storageBucket: 'bakeflow-erp.firebasestorage.app',
+    measurementId: 'G-2C2495V9MN',
   );
 }
