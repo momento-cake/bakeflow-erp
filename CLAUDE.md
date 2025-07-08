@@ -16,6 +16,7 @@
 For detailed technical information, refer to the specialized documentation:
 
 - **[Project Structure](docs/project-structure.md)**: Architecture, patterns, and code organization
+- **[Design Guidelines](docs/design-guidelines.md)**: UI styling, color schemes, typography, and component guidelines
 - **[README.md](README.md)**: Setup instructions and project overview
 - **[GitHub Issues](https://github.com/momento-cake/bakeflow-erp/issues)**: Bug reports and feature requests
 
@@ -30,28 +31,17 @@ For detailed technical information, refer to the specialized documentation:
 - **Version Control**: Git with conventional commits
 - **CI/CD**: GitHub Actions with automated Firebase deployment
 
-### Visual Identity
+### Design System
 
-#### Color Scheme
-- **Primary**: #8B4513 (Saddle Brown) - Represents chocolate and warmth
-- **Secondary**: #FFF8DC (Cornsilk) - Light, clean bakery feeling  
-- **Accent**: #FF6B6B (Soft Red) - For CTAs and important elements
-- **Success**: #4ECDC4 (Turquoise) - For positive feedback
-- **Warning**: #FFD93D (Honey Yellow) - For alerts
-- **Neutral Gray**: #6C757D - For secondary text
-- **Background**: #FAFAFA - Light gray for main background
+The application follows a comprehensive design system with warm, professional aesthetics suitable for bakery businesses. For detailed design specifications, including:
 
-#### Typography
-- **Headers**: Playfair Display (elegant, readable)
-- **Body**: Inter (clean, modern, excellent readability)
-- **Numbers/Prices**: Roboto Mono (clear distinction for financial data)
+- **Color Palettes**: Primary, secondary, semantic colors with accessibility guidelines
+- **Typography**: Font families, scales, and usage guidelines  
+- **Component Styles**: Buttons, forms, cards, and layout patterns
+- **Responsive Design**: Mobile-first approach with consistent breakpoints
+- **Accessibility**: WCAG compliance and inclusive design practices
 
-#### UI Principles
-- Mobile-first responsive design
-- Card-based layouts for product displays
-- Floating Action Buttons (FAB) for primary actions
-- Material Design 3 with minimal depth shadows
-- Consistent spacing and rounded corners (8px cards, 16px buttons)
+**Refer to: [Design Guidelines](docs/design-guidelines.md)** for complete styling specifications.
 
 ### Development Workflow
 
