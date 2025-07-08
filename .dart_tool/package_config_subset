@@ -218,6 +218,10 @@ flutter_shaders
 2.19
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/flutter_shaders-0.1.3/
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/flutter_shaders-0.1.3/lib/
+freezed
+3.0
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/freezed-2.5.7/
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/freezed-2.5.7/lib/
 freezed_annotation
 3.0
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/freezed_annotation-2.4.4/
@@ -306,6 +310,10 @@ json_annotation
 3.0
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/json_annotation-4.9.0/
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/json_annotation-4.9.0/lib/
+json_serializable
+3.5
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/json_serializable-6.9.0/
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/json_serializable-6.9.0/lib/
 leak_tracker
 3.2
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/leak_tracker-10.0.7/
@@ -434,6 +442,10 @@ source_gen
 3.0
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/source_gen-1.5.0/
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/source_gen-1.5.0/lib/
+source_helper
+3.4
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/source_helper-1.3.5/
+file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/source_helper-1.3.5/lib/
 source_span
 2.18
 file:///Users/gabrielaraujo/.pub-cache/hosted/pub.dev/source_span-1.10.0/

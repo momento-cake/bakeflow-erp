@@ -10,3 +10,6 @@
 firebase-debug.log
 .firebase/
 build/
+.dart_tool/
+.dart_tool/*
+.flutter-plugins-dependencies

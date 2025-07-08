@@ -20,6 +20,7 @@ For detailed technical information, refer to the specialized documentation:
 - **[Project Structure](docs/project-structure.md)**: Architecture, patterns, and code organization
 - **[Design Guidelines](docs/design-guidelines.md)**: UI styling, color schemes, typography, and component guidelines
 - **[Deployment & Infrastructure](docs/deployment-infrastructure.md)**: CI/CD pipeline, Firebase setup, and deployment workflows
+- **[Implementation Roadmap](docs/roadmap.md)**: Feature priorities, timelines, and development phases
 - **[README.md](README.md)**: Setup instructions and project overview
 - **[GitHub Issues](https://github.com/momento-cake/bakeflow-erp/issues)**: Bug reports and feature requests
 
@@ -103,49 +104,15 @@ match /businesses/{businessId} {
 }
 ```
 
-## Core Features Roadmap
+## Feature Implementation Status
 
-### Phase 1: Foundation (MVP) ✅
-1. **Authentication & Multi-tenancy** ✅
-   - Email/password login with Firebase Auth
-   - Route guards and session management
-   - Portuguese error messages
+For detailed feature roadmap, timelines, and implementation phases, refer to **[Implementation Roadmap](docs/roadmap.md)**.
 
-2. **Ingredient Management** 🚧
-   - CRUD operations with validation
-   - Unit conversions (kg↔g, L↔mL)
-   - Supplier linking and price tracking
-
-3. **Recipe Builder** 📋
-   - Ingredient quantities and steps
-   - Yield calculation and cost auto-calculation
-   - Recipe versioning and modification history
-
-4. **Product Catalog** 📋
-   - Link to recipes with size variations
-   - Categories matching current menus
-   - Photo gallery and pricing rules
-
-5. **Purchase Registry** 📋
-   - Manual entry forms with receipt tracking
-   - Automatic ingredient price updates
-   - Supplier management integration
-
-6. **Pricing Calculator** 📋
-   - Cost breakdown visualization
-   - Margin calculator with business rules
-   - Suggested pricing based on market analysis
-
-### Phase 2: Operations 📋
-- Order Management (customer orders, production planning)
-- Inventory Tracking (stock levels, expiration alerts)
-- Financial Reports (profit/loss, performance analysis)
-
-### Phase 3: Growth 📋
-- Multi-location support
-- Desktop app (Flutter Desktop)
-- API for third-party integrations
-- Advanced analytics and insights
+### Current Status Summary
+- **Phase 1 Foundation**: In progress (Authentication ✅, Ingredient Management 🚧)
+- **Firebase Services**: Needs console configuration
+- **Next Priority**: Complete ingredient management system
+- **Target MVP**: End of July 2025
 
 ## Business Logic Rules
 
@@ -240,14 +207,13 @@ The application implements web performance optimizations and monitoring strategi
 
 **Refer to: [Deployment & Infrastructure](docs/deployment-infrastructure.md)** for complete performance and monitoring specifications.
 
-## Next Development Steps
+## Immediate Next Steps
 
-1. **Enable Firebase Services**: Authentication and Firestore in Firebase Console
-2. **Implement Ingredient Management**: CRUD operations with form validation
-3. **Build Recipe System**: Ingredient linking and cost calculation
-4. **Create Product Catalog**: Menu-based categorization and pricing
-5. **Add Purchase Tracking**: Receipt management and price updates
-6. **Develop Pricing Tools**: Margin calculation and optimization
+1. **Firebase Console Setup**: Enable Authentication, Firestore, and Storage services
+2. **Ingredient Management Implementation**: Complete CRUD operations with validation
+3. **Recipe Builder Planning**: Document feature requirements and architecture
+
+For detailed implementation roadmap with timelines and priorities, see **[Implementation Roadmap](docs/roadmap.md)**.
 
 ## Support and Resources
 

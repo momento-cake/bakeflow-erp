@@ -224,6 +224,12 @@ Examples:
   ❌ Hard-coded service instantiation in UI components
 ```
 
+#### Flutter Basics
+- Use FVM for all flutter/dart commands
+- Leverage freezed for codegen and model json contract definition
+- Use riverpod for state management
+- Use mvvm arch
+
 ## File Organization & Modularity
 
 ### File Size and Structure Guidelines
