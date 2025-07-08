@@ -84,13 +84,22 @@ class InitialSetupService {
         },
       );
 
-      await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+      // Convert to JSON and fix role serialization
+      final userJson = userModel.toJson();
+      
+      // Fix the role serialization to use a simple type field
+      userJson['role'] = {
+        'type': 'admin',
+      };
+      
+      await _firestore.collection('users').doc(user.uid).set(userJson);
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
       throw Exception(_getErrorMessage(e.code));
     } catch (e) {
-      throw Exception(e.toString());
+      print('Error creating initial admin: $e');
+      throw Exception('Erro ao criar administrador: ${e.toString()}');
     }
   }
 

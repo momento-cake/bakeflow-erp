@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write their own user document
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow reading users if authenticated (for admin features)
+    match /users/{userId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Business access rules
+    match /businesses/{businessId} {
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.authorizedUsers;
+      allow write: if request.auth != null && 
+        request.auth.uid in resource.data.authorizedUsers;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.ownerId;
+    }
+    
+    // Business sub-collections
+    match /businesses/{businessId}/{document=**} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/businesses/$(businessId)).data.authorizedUsers;
+    }
+  }
+}
