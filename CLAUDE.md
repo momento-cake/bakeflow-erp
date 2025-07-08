@@ -16,6 +16,7 @@
 For detailed technical information, refer to the specialized documentation:
 
 - **[Development Workflow](docs/development-workflow.md)**: LLM agent guidelines, code standards, and development process
+- **[MCP Usage Guide](docs/mcp.md)**: Model Context Protocol servers for accessing current documentation
 - **[Project Structure](docs/project-structure.md)**: Architecture, patterns, and code organization
 - **[Design Guidelines](docs/design-guidelines.md)**: UI styling, color schemes, typography, and component guidelines
 - **[Deployment & Infrastructure](docs/deployment-infrastructure.md)**: CI/CD pipeline, Firebase setup, and deployment workflows
@@ -269,5 +270,7 @@ The application implements web performance optimizations and monitoring strategi
 - Prioritize user experience with mobile-first design
 - Implement proper error handling and user feedback
 - Document architectural decisions and significant changes
+
+**MCP Integration**: Use Model Context Protocol servers to access current documentation for Flutter, Firebase, and related libraries. Refer to [MCP Usage Guide](docs/mcp.md) for Context7 server integration patterns, security considerations, and best practices for accessing up-to-date library documentation beyond training cutoff.
 
 **Detailed Guidelines**: All development standards, code principles, security requirements, and workflow processes are documented in [Development Workflow](docs/development-workflow.md).
