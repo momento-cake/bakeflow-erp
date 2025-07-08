@@ -18,7 +18,6 @@ class AppTheme {
         primary: primaryColor,
         secondary: accentColor,
         surface: backgroundColor,
-        background: backgroundColor,
         error: const Color(0xFFE74C3C),
       ),
       scaffoldBackgroundColor: backgroundColor,
@@ -103,11 +102,11 @@ class AppTheme {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: neutralGray.withOpacity(0.3)),
+          borderSide: BorderSide(color: neutralGray.withValues(alpha: 0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: neutralGray.withOpacity(0.3)),
+          borderSide: BorderSide(color: neutralGray.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -125,7 +124,7 @@ class AppTheme {
         elevation: 4,
       ),
       dividerTheme: DividerThemeData(
-        color: neutralGray.withOpacity(0.2),
+        color: neutralGray.withValues(alpha: 0.2),
         thickness: 1,
         space: 1,
       ),
