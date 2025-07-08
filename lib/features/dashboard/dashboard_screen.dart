@@ -9,9 +9,10 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
-
-    return Scaffold(
+    final userAsync = ref.watch(currentUserProvider);
+    
+    return userAsync.when(
+      data: (user) => Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
@@ -120,6 +121,15 @@ class DashboardScreen extends ConsumerWidget {
               ],
             ),
           ],
+        ),
+      ),
+      ),
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        body: Center(
+          child: Text('Error: $error'),
         ),
       ),
     );

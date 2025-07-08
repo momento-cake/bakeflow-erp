@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/user_model.dart';
 
@@ -10,12 +11,24 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
-final currentUserProvider = Provider<UserModel?>((ref) {
+final currentUserProvider = StreamProvider<UserModel?>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.when(
-    data: (user) => user != null ? UserModel.fromFirebaseUser(user) : null,
-    loading: () => null,
-    error: (_, __) => null,
+    data: (user) {
+      if (user == null) return Stream.value(null);
+      return FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots()
+          .map((doc) {
+        if (doc.exists) {
+          return UserModel.fromJson(doc.data()!);
+        }
+        return UserModel.fromFirebaseUser(user);
+      });
+    },
+    loading: () => Stream.value(null),
+    error: (_, __) => Stream.value(null),
   );
 });
 

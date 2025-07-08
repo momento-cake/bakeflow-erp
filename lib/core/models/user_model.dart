@@ -42,6 +42,7 @@ class UserModel with _$UserModel {
 
 @freezed
 class UserRole with _$UserRole {
+  const factory UserRole.admin() = _Admin;
   const factory UserRole.owner() = _Owner;
   const factory UserRole.manager() = _Manager;
   const factory UserRole.employee() = _Employee;
@@ -52,6 +53,8 @@ class UserRole with _$UserRole {
 
   static UserRole fromString(String value) {
     switch (value.toLowerCase()) {
+      case 'admin':
+        return const UserRole.admin();
       case 'owner':
         return const UserRole.owner();
       case 'manager':
@@ -68,27 +71,63 @@ class UserRole with _$UserRole {
 
 extension UserRoleExtension on UserRole {
   String get name => when(
+        admin: () => 'admin',
         owner: () => 'owner',
         manager: () => 'manager',
         employee: () => 'employee',
         viewer: () => 'viewer',
       );
 
+  bool get isAdmin => when(
+        admin: () => true,
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
+        viewer: () => false,
+      );
+
+  bool get canManageUsers => when(
+        admin: () => true,
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
+        viewer: () => false,
+      );
+
+  bool get canManageCompanies => when(
+        admin: () => true,
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
+        viewer: () => false,
+      );
+
+  bool get canResetPasswords => when(
+        admin: () => true,
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
+        viewer: () => false,
+      );
+
+  bool get canCreateAccounts => when(
+        admin: () => true,
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
+        viewer: () => false,
+      );
+
   String get displayName => when(
+        admin: () => 'Administrador',
         owner: () => 'Proprietário',
         manager: () => 'Gerente',
         employee: () => 'Funcionário',
         viewer: () => 'Visualizador',
       );
 
-  bool get canManageUsers => when(
-        owner: () => true,
-        manager: () => true,
-        employee: () => false,
-        viewer: () => false,
-      );
-
   bool get canManageProducts => when(
+        admin: () => true,
         owner: () => true,
         manager: () => true,
         employee: () => true,
@@ -96,6 +135,7 @@ extension UserRoleExtension on UserRole {
       );
 
   bool get canViewReports => when(
+        admin: () => true,
         owner: () => true,
         manager: () => true,
         employee: () => false,

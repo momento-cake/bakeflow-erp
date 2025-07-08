@@ -147,12 +147,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppTheme.spacingMedium),
                     
                     TextButton(
-                      onPressed: () => context.go('/register'),
-                      child: const Text('Não tem conta? Criar conta'),
-                    ),
-                    const SizedBox(height: AppTheme.spacingSmall),
-                    
-                    TextButton(
                       onPressed: () => context.go('/forgot-password'),
                       child: const Text('Esqueci minha senha'),
                     ),

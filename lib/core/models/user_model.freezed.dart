@@ -411,6 +411,8 @@ abstract class _UserModel implements UserModel {
 
 UserRole _$UserRoleFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
+    case 'admin':
+      return _Admin.fromJson(json);
     case 'owner':
       return _Owner.fromJson(json);
     case 'manager':
@@ -430,6 +432,7 @@ UserRole _$UserRoleFromJson(Map<String, dynamic> json) {
 mixin _$UserRole {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() admin,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
@@ -438,6 +441,7 @@ mixin _$UserRole {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
@@ -446,6 +450,7 @@ mixin _$UserRole {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
@@ -455,6 +460,7 @@ mixin _$UserRole {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
@@ -463,6 +469,7 @@ mixin _$UserRole {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
@@ -471,6 +478,7 @@ mixin _$UserRole {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
@@ -501,6 +509,145 @@ class _$UserRoleCopyWithImpl<$Res, $Val extends UserRole>
 
   /// Create a copy of UserRole
   /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$AdminImplCopyWith<$Res> {
+  factory _$$AdminImplCopyWith(
+          _$AdminImpl value, $Res Function(_$AdminImpl) then) =
+      __$$AdminImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$AdminImplCopyWithImpl<$Res>
+    extends _$UserRoleCopyWithImpl<$Res, _$AdminImpl>
+    implements _$$AdminImplCopyWith<$Res> {
+  __$$AdminImplCopyWithImpl(
+      _$AdminImpl _value, $Res Function(_$AdminImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UserRole
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AdminImpl implements _Admin {
+  const _$AdminImpl({final String? $type}) : $type = $type ?? 'admin';
+
+  factory _$AdminImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AdminImplFromJson(json);
+
+  @JsonKey(name: 'runtimeType')
+  final String $type;
+
+  @override
+  String toString() {
+    return 'UserRole.admin()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$AdminImpl);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() admin,
+    required TResult Function() owner,
+    required TResult Function() manager,
+    required TResult Function() employee,
+    required TResult Function() viewer,
+  }) {
+    return admin();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
+    TResult? Function()? owner,
+    TResult? Function()? manager,
+    TResult? Function()? employee,
+    TResult? Function()? viewer,
+  }) {
+    return admin?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
+    TResult Function()? owner,
+    TResult Function()? manager,
+    TResult Function()? employee,
+    TResult Function()? viewer,
+    required TResult orElse(),
+  }) {
+    if (admin != null) {
+      return admin();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
+    required TResult Function(_Owner value) owner,
+    required TResult Function(_Manager value) manager,
+    required TResult Function(_Employee value) employee,
+    required TResult Function(_Viewer value) viewer,
+  }) {
+    return admin(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
+    TResult? Function(_Owner value)? owner,
+    TResult? Function(_Manager value)? manager,
+    TResult? Function(_Employee value)? employee,
+    TResult? Function(_Viewer value)? viewer,
+  }) {
+    return admin?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
+    TResult Function(_Owner value)? owner,
+    TResult Function(_Manager value)? manager,
+    TResult Function(_Employee value)? employee,
+    TResult Function(_Viewer value)? viewer,
+    required TResult orElse(),
+  }) {
+    if (admin != null) {
+      return admin(this);
+    }
+    return orElse();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AdminImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Admin implements UserRole {
+  const factory _Admin() = _$AdminImpl;
+
+  factory _Admin.fromJson(Map<String, dynamic> json) = _$AdminImpl.fromJson;
 }
 
 /// @nodoc
@@ -551,6 +698,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() admin,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
@@ -562,6 +710,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
@@ -573,6 +722,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
@@ -588,6 +738,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
@@ -599,6 +750,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
@@ -610,6 +762,7 @@ class _$OwnerImpl implements _Owner {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
@@ -684,6 +837,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() admin,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
@@ -695,6 +849,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
@@ -706,6 +861,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
@@ -721,6 +877,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
@@ -732,6 +889,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
@@ -743,6 +901,7 @@ class _$ManagerImpl implements _Manager {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
@@ -817,6 +976,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() admin,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
@@ -828,6 +988,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
@@ -839,6 +1000,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
@@ -854,6 +1016,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
@@ -865,6 +1028,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
@@ -876,6 +1040,7 @@ class _$EmployeeImpl implements _Employee {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
@@ -951,6 +1116,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() admin,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
@@ -962,6 +1128,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
@@ -973,6 +1140,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
@@ -988,6 +1156,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
@@ -999,6 +1168,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
@@ -1010,6 +1180,7 @@ class _$ViewerImpl implements _Viewer {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,

@@ -42,6 +42,15 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'metadata': instance.metadata,
     };
 
+_$AdminImpl _$$AdminImplFromJson(Map<String, dynamic> json) => _$AdminImpl(
+      $type: json['runtimeType'] as String?,
+    );
+
+Map<String, dynamic> _$$AdminImplToJson(_$AdminImpl instance) =>
+    <String, dynamic>{
+      'runtimeType': instance.$type,
+    };
+
 _$OwnerImpl _$$OwnerImplFromJson(Map<String, dynamic> json) => _$OwnerImpl(
       $type: json['runtimeType'] as String?,
     );
