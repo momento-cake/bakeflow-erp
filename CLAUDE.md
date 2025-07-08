@@ -15,6 +15,7 @@
 
 For detailed technical information, refer to the specialized documentation:
 
+- **[Development Workflow](docs/development-workflow.md)**: LLM agent guidelines, code standards, and development process
 - **[Project Structure](docs/project-structure.md)**: Architecture, patterns, and code organization
 - **[Design Guidelines](docs/design-guidelines.md)**: UI styling, color schemes, typography, and component guidelines
 - **[Deployment & Infrastructure](docs/deployment-infrastructure.md)**: CI/CD pipeline, Firebase setup, and deployment workflows
@@ -44,31 +45,18 @@ The application follows a comprehensive design system with warm, professional ae
 
 **Refer to: [Design Guidelines](docs/design-guidelines.md)** for complete styling specifications.
 
-### Development Workflow
+### Development Process
 
-#### Git Workflow
-- **main**: Production-ready code, automatically deployed
-- **feature/***: Feature development branches
-- **hotfix/***: Critical production fixes
-- Small, focused commits with descriptive messages
-- Pull requests for code review before merging
+This project follows a comprehensive development workflow optimized for LLM agents. For detailed guidelines including:
 
-#### Commit Conventions
-```
-feat: add ingredient management CRUD operations
-fix: resolve authentication redirect loop
-docs: update project structure documentation
-style: apply consistent code formatting
-refactor: extract common UI components
-test: add unit tests for pricing calculator
-```
+- **LLM Agent Persona**: Role definition, expertise areas, and decision-making authority
+- **Code Standards**: SOLID, KISS, DRY, YAGNI principles with practical examples
+- **Security-First Development**: Input validation, authentication, and data protection
+- **File Organization**: Modularity guidelines, naming conventions, and structure patterns
+- **Git Workflow**: Branch strategy, commit conventions, and quality gates
+- **Testing Strategy**: Unit, widget, and integration testing approaches
 
-#### Code Standards
-- Follow Flutter/Dart conventions and best practices
-- Use meaningful variable and function names in English
-- Add Portuguese comments for business logic explanations
-- Implement proper error handling with user-friendly messages
-- Write unit tests for business logic and widget tests for UI
+**Refer to: [Development Workflow](docs/development-workflow.md)** for complete development guidelines and standards.
 
 ### Feature Development Pattern
 
@@ -267,16 +255,19 @@ The application implements web performance optimizations and monitoring strategi
 - **Riverpod Documentation**: https://riverpod.dev/
 - **Material Design 3**: https://m3.material.io/
 
-## Guidelines for AI Development
+## AI Development Guidelines
 
-- You are the master architect for this project and will handle everything on all ends
-- Use git for proper project setup and maintain clean commit history
-- Use the Firebase CLI to configure everything needed on Firebase
-- Test everything you create and verify results before committing
-- You have full access to Firebase and GitHub to completely create and deploy this project
-- Only use the account momentocake@gmail.com for Firebase operations
-- Work within the company GitHub organization: https://github.com/momento-cake
-- Follow the established patterns and maintain consistency with the existing codebase
-- Prioritize user experience with intuitive, mobile-first design
+**Role**: Master Software Architect & Full-Stack Developer with complete project ownership
+
+**Key Responsibilities**:
+- Autonomous development within established guidelines
+- Maintain clean commit history and require user approval for commits
+- Configure Firebase services using momentocake@gmail.com account
+- Test thoroughly before any changes and verify results
+- Work within GitHub organization: https://github.com/momento-cake
+- Follow established patterns and maintain codebase consistency
+- Prioritize user experience with mobile-first design
 - Implement proper error handling and user feedback
-- Document significant changes and architectural decisions
+- Document architectural decisions and significant changes
+
+**Detailed Guidelines**: All development standards, code principles, security requirements, and workflow processes are documented in [Development Workflow](docs/development-workflow.md).
