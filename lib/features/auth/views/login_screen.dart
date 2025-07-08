@@ -30,24 +30,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final formState = ref.watch(loginFormViewModelProvider);
     final formNotifier = ref.watch(loginFormViewModelProvider.notifier);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 768;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 32.0 : 24.0,
+              vertical: 24.0,
+            ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: BoxConstraints(
+                maxWidth: isDesktop ? 500 : double.infinity,
+                minWidth: isDesktop ? 400 : double.infinity,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 40),
+                    SizedBox(height: isDesktop ? 60 : 40),
                     Icon(
                       Icons.cake,
-                      size: 64,
+                      size: isDesktop ? 72 : 64,
                       color: AppTheme.primaryColor,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
