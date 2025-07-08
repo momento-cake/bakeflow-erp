@@ -1,0 +1,11 @@
+# FVM
+.fvm/flutter_sdk
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Firebase
+firebase-debug.log
+.firebase/
