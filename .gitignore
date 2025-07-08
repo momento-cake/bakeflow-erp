@@ -9,3 +9,4 @@
 # Firebase
 firebase-debug.log
 .firebase/
+build/
