@@ -48,6 +48,9 @@ bakeflow-erp/
 ├── test/                         # Test files
 │   └── widget_test.dart          # Widget and unit tests
 ├── docs/                         # Project documentation
+│   ├── features/                 # Feature-specific documentation
+│   │   ├── README.md            # Feature documentation guidelines
+│   │   └── ingredient-management.md # Example feature documentation
 │   └── project-structure.md     # This file
 ├── menus/                        # Business reference materials
 │   ├── details.md                # Menu descriptions
