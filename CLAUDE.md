@@ -17,6 +17,7 @@ For detailed technical information, refer to the specialized documentation:
 
 - **[Project Structure](docs/project-structure.md)**: Architecture, patterns, and code organization
 - **[Design Guidelines](docs/design-guidelines.md)**: UI styling, color schemes, typography, and component guidelines
+- **[Deployment & Infrastructure](docs/deployment-infrastructure.md)**: CI/CD pipeline, Firebase setup, and deployment workflows
 - **[README.md](README.md)**: Setup instructions and project overview
 - **[GitHub Issues](https://github.com/momento-cake/bakeflow-erp/issues)**: Bug reports and feature requests
 
@@ -192,41 +193,32 @@ fvm flutter analyze
 fvm flutter build web --release
 ```
 
-### Deployment
+### Deployment & Infrastructure
+
+The project uses Firebase Hosting with GitHub Actions for automated CI/CD. For comprehensive deployment information including:
+
+- **CI/CD Pipeline**: Automated testing and deployment workflow
+- **Firebase Configuration**: Service setup and security rules
+- **Environment Management**: Development and production configurations
+- **Troubleshooting**: Common issues and solutions
+- **Monitoring**: Performance and analytics setup
+
+**Refer to: [Deployment & Infrastructure](docs/deployment-infrastructure.md)** for complete deployment specifications.
+
+### Quick Commands
 ```bash
-# Deploy to Firebase Hosting
+# Development
+fvm flutter run -d web-server --web-port=3000
+fvm flutter test
+fvm flutter analyze
+
+# Build and deploy
+fvm flutter build web --release
 firebase deploy --only hosting
 
-# Deploy with GitHub Actions (automatic on main branch push)
+# Automated deployment: push to main branch
 git push origin main
 ```
-
-### Project Setup
-```bash
-# Install Flutter version with FVM
-fvm install stable
-fvm use stable
-
-# Get dependencies
-fvm flutter pub get
-
-# Generate code (if using code generation)
-fvm flutter packages pub run build_runner build
-```
-
-## Environment Configuration
-
-### Firebase Setup
-1. **Authentication**: Enable Email/Password provider in Firebase Console
-2. **Firestore**: Create database in test mode for development
-3. **Storage**: Configure for receipt uploads and product images
-4. **Hosting**: Configured for automatic deployment via GitHub Actions
-
-### Development Environment
-- Flutter SDK managed with FVM
-- VS Code with Flutter/Dart extensions recommended
-- Firebase CLI for project management
-- Git for version control
 
 ## Testing Strategy
 
@@ -248,32 +240,16 @@ fvm flutter test --coverage
 fvm flutter test test/features/auth/auth_service_test.dart
 ```
 
-## Performance Optimization
+## Performance & Monitoring
 
-### Web Performance
-- Tree shaking for unused code elimination
-- Lazy loading of feature modules
-- Image optimization and caching strategies
-- Service worker for offline capabilities
+The application implements web performance optimizations and monitoring strategies. For detailed information on:
 
-### Build Optimization
-- Minimize bundle size through selective imports
-- Optimize assets (images, fonts, icons)
-- Use Firebase CDN for static assets
-- Implement progressive loading for large datasets
+- **Build Optimization**: Bundle size management and asset optimization
+- **Performance Monitoring**: Core Web Vitals and Firebase metrics  
+- **Error Tracking**: Crashlytics and debugging strategies
+- **Analytics Setup**: User behavior and business metrics
 
-## Monitoring and Analytics
-
-### Current Setup
-- Firebase Hosting for deployment metrics
-- GitHub Actions for build and deployment monitoring
-- Flutter web debugging tools for development
-
-### Future Implementation
-- Firebase Analytics for user behavior tracking
-- Firebase Performance Monitoring for web vitals
-- Error reporting with Firebase Crashlytics
-- Custom metrics for business KPIs
+**Refer to: [Deployment & Infrastructure](docs/deployment-infrastructure.md)** for complete performance and monitoring specifications.
 
 ## Next Development Steps
 
