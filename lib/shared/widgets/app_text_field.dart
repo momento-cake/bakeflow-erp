@@ -3,6 +3,8 @@ import '../../app/themes/app_theme.dart';
 
 class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
+  final String? value;
+  final ValueChanged<String>? onChanged;
   final String labelText;
   final String? hintText;
   final bool obscureText;
@@ -13,10 +15,14 @@ class AppTextField extends StatelessWidget {
   final int maxLines;
   final bool enabled;
   final VoidCallback? onTap;
+  final TextInputAction textInputAction;
+  final String? errorText;
 
   const AppTextField({
     super.key,
     this.controller,
+    this.value,
+    this.onChanged,
     required this.labelText,
     this.hintText,
     this.obscureText = false,
@@ -27,7 +33,12 @@ class AppTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.onTap,
-  });
+    this.textInputAction = TextInputAction.done,
+    this.errorText,
+  }) : assert(
+         (controller != null) ^ (value != null && onChanged != null),
+         'Either controller or value/onChanged must be provided, but not both',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +55,20 @@ class AppTextField extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingSmall),
         TextFormField(
           controller: controller,
+          initialValue: controller == null ? value : null,
+          onChanged: onChanged,
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
           maxLines: maxLines,
           enabled: enabled,
           onTap: onTap,
+          textInputAction: textInputAction,
           decoration: InputDecoration(
             hintText: hintText,
             suffixIcon: suffixIcon,
             prefixIcon: prefixIcon,
+            errorText: errorText,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               borderSide: BorderSide(

@@ -7,6 +7,7 @@ class AppTheme {
   static const Color accentColor = Color(0xFFFF6B6B); // Soft Red
   static const Color successColor = Color(0xFF4ECDC4); // Turquoise
   static const Color warningColor = Color(0xFFFFD93D); // Honey Yellow
+  static const Color errorColor = Color(0xFFE74C3C); // Error Red
   static const Color neutralGray = Color(0xFF6C757D); // Neutral Gray
   static const Color backgroundColor = Color(0xFFFAFAFA); // Light Gray
 
