@@ -1,0 +1,85 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run -d web-server --web-port=3000
+
+## exception
+
+SocketException: SocketException: Read failed (OS Error: Input/output error, errno = 5), port = 0
+
+```
+#0      _NativeSocket.read (dart:io-patch/socket_patch.dart:1134:33)
+#1      _RawSocket.read (dart:io-patch/socket_patch.dart:1992:26)
+#2      _Socket._onData (dart:io-patch/socket_patch.dart:2454:28)
+#3      _rootRunUnary (dart:async/zone.dart:1430:13)
+#4      _CustomZone.runUnary (dart:async/zone.dart:1324:19)
+#5      _CustomZone.runUnaryGuarded (dart:async/zone.dart:1233:7)
+#6      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:366:11)
+#7      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:297:7)
+#8      _SyncStreamControllerDispatch._sendData (dart:async/stream_controller.dart:777:19)
+#9      _StreamController._add (dart:async/stream_controller.dart:651:7)
+#10     _StreamController.add (dart:async/stream_controller.dart:606:5)
+#11     new _RawSocket.<anonymous closure> (dart:io-patch/socket_patch.dart:1942:33)
+#12     _NativeSocket.issueReadEvent.issue (dart:io-patch/socket_patch.dart:1385:14)
+#13     _microtaskLoop (dart:async/schedule_microtask.dart:40:21)
+#14     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+#15     _runPendingImmediateCallback (dart:isolate-patch/isolate_patch.dart:118:13)
+#16     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:185:5)
+```
+
+## flutter doctor
+
+```
+[32m[✓][39m Flutter (Channel stable, 3.27.4, on macOS 15.5 24F74 darwin-arm64, locale en-BR)
+    [32m•[39m Flutter version 3.27.4 on channel stable at /Users/gabrielaraujo/fvm/versions/stable
+    [32m•[39m Upstream repository https://github.com/flutter/flutter.git
+    [32m•[39m Framework revision d8a9f9a52e (5 months ago), 2025-01-31 16:07:18 -0500
+    [32m•[39m Engine revision 82bd5b7209
+    [32m•[39m Dart version 3.6.2
+    [32m•[39m DevTools version 2.40.3
+
+[32m[✓][39m Android toolchain - develop for Android devices (Android SDK version 35.0.0)
+    [32m•[39m Android SDK at /Users/gabrielaraujo/Library/Android/sdk
+    [32m•[39m Platform android-35, build-tools 35.0.0
+    [32m•[39m Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    [32m•[39m Java version OpenJDK Runtime Environment (build 21.0.6+-13368085-b895.109)
+    [32m•[39m All Android licenses accepted.
+
+[32m[✓][39m Xcode - develop for iOS and macOS (Xcode 16.3)
+    [32m•[39m Xcode at /Applications/Xcode.app/Contents/Developer
+    [32m•[39m Build 16E140
+    [32m•[39m CocoaPods version 1.16.2
+
+[31m[✗][39m Chrome - develop for the web (Cannot find Chrome executable at /Applications/Opera.app/Contents/MacOS/Opera)
+    [33m![39m /Applications/Opera.app/Contents/MacOS/Opera is not executable.
+
+[32m[✓][39m Android Studio (version 2024.3)
+    [32m•[39m Android Studio at /Applications/Android Studio.app/Contents
+    [32m•[39m Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    [32m•[39m Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    [32m•[39m Java version OpenJDK Runtime Environment (build 21.0.6+-13368085-b895.109)
+
+[32m[✓][39m VS Code (version 1.100.3)
+    [32m•[39m VS Code at /Applications/Visual Studio Code.app/Contents
+    [32m•[39m Flutter extension version 3.106.0
+
+[32m[✓][39m Connected device (5 available)
+    [32m•[39m Gabriel’s iPhone (mobile)           • 00008130-001A38841E31001C            • ios            • iOS 18.5 22F76
+    [32m•[39m iPhone SE (3rd generation) (mobile) • A942E176-4A2E-4025-9F0D-C0C9E65ADC96 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-18-0 (simulator)
+    [32m•[39m macOS (desktop)                     • macos                                • darwin-arm64   • macOS 15.5 24F74 darwin-arm64
+    [32m•[39m Mac Designed for iPad (desktop)     • mac-designed-for-ipad                • darwin         • macOS 15.5 24F74 darwin-arm64
+    [32m•[39m Web Server (web)                    • web-server                           • web-javascript • Flutter Tools
+    [33m![39m Error: Browsing on the local area network for Gabriel Araujo’s iPad. Ensure the device is unlocked and attached with a cable or associated with the same local area network as this Mac.
+      The device must be opted into Developer Mode to connect wirelessly. (code -27)
+    [33m![39m Error: Browsing on the local area network for Mayara’s iPhone. Ensure the device is unlocked and attached with a cable or associated with the same local area network as this Mac.
+      The device must be opted into Developer Mode to connect wirelessly. (code -27)
+
+[32m[✓][39m Network resources
+    [32m•[39m All expected network resources are available.
+
+[33m![39m Doctor found issues in 1 category.
+```

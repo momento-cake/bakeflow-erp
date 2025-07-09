@@ -22,7 +22,7 @@ class LoginFormState with _$LoginFormState {
     @Default('') String email,
     @Default('') String password,
     @Default(false) bool isLoading,
-    @Default(false) bool obscurePassword,
+    @Default(true) bool obscurePassword,
     @Default(false) bool rememberMe,
     String? emailError,
     String? passwordError,

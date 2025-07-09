@@ -1,0 +1,611 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/themes/app_theme.dart';
+import '../../../core/models/user_model.dart';
+import '../../../shared/widgets/shared_header.dart';
+import '../../auth/services/auth_service.dart';
+import '../services/admin_user_service.dart';
+
+class AdminUsersScreen extends ConsumerStatefulWidget {
+  const AdminUsersScreen({super.key});
+
+  @override
+  ConsumerState<AdminUsersScreen> createState() => _AdminUsersScreenState();
+}
+
+class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchTimer;
+  String _searchQuery = '';
+  String _selectedFilter = 'todos';
+  int _pageSize = 20;
+  int _currentPage = 0;
+  
+  final List<String> _filters = ['todos', 'administradores', 'usuarios'];
+  final List<int> _pageSizes = [20, 50, 100];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Cancel previous timer
+    _searchTimer?.cancel();
+    
+    // Start new timer with 300ms delay (throttling)
+    _searchTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _searchQuery = _searchController.text.toLowerCase();
+          _currentPage = 0; // Reset to first page when searching
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = ref.watch(currentUserProvider);
+    
+    if (currentUser == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
+    
+    return firestoreUser.when(
+      data: (user) => _buildScreen(context, user ?? currentUser),
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => _buildScreen(context, currentUser),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context, UserModel currentUser) {
+    // Check if user is admin
+    if (!currentUser.role.isAdmin) {
+      return _buildAccessDenied(context);
+    }
+
+    final usersAsync = ref.watch(allUsersProvider);
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      body: Column(
+        children: [
+          ScreenHeader(
+            user: currentUser,
+            title: 'Gerenciar Usuários',
+            subtitle: 'Administre usuários do sistema',
+            onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
+            onNotificationTap: () => _showComingSoon(context, 'Notificações'),
+            showBackButton: true,
+            fallbackRoute: '/dashboard',
+            actions: [
+              // Add User Button with explicit text
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('/admin/users/create'),
+                  icon: Icon(Icons.add, color: Colors.white),
+                  label: const Text(
+                    'Adicionar Usuário',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: usersAsync.when(
+              data: (allUsers) => _buildUsersList(context, allUsers),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppTheme.errorColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Erro ao carregar usuários',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      error.toString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.neutralGray,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => ref.invalidate(allUsersProvider),
+                      child: const Text('Tentar Novamente'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUsersList(BuildContext context, List<UserModel> allUsers) {
+    // Apply filters and search
+    List<UserModel> filteredUsers = _applyFilters(allUsers);
+    
+    // Apply pagination
+    final totalUsers = filteredUsers.length;
+    final totalPages = (totalUsers / _pageSize).ceil();
+    final startIndex = _currentPage * _pageSize;
+    final endIndex = (startIndex + _pageSize).clamp(0, totalUsers);
+    
+    final paginatedUsers = filteredUsers.sublist(
+      startIndex.clamp(0, totalUsers),
+      endIndex,
+    );
+    
+    return Column(
+      children: [
+        // Search and Filter Section
+        _buildSearchAndFilters(),
+        
+        // Users List
+        Expanded(
+          child: paginatedUsers.isEmpty
+              ? _buildEmptyState(context)
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(allUsersProvider);
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: paginatedUsers.length,
+                    itemBuilder: (context, index) {
+                      final user = paginatedUsers[index];
+                      return _buildUserCard(context, user);
+                    },
+                  ),
+                ),
+        ),
+        
+        // Pagination Controls
+        if (totalPages > 1) _buildPaginationControls(totalPages, totalUsers),
+      ],
+    );
+  }
+  
+  List<UserModel> _applyFilters(List<UserModel> users) {
+    List<UserModel> filtered = users;
+    
+    // Apply role filter
+    switch (_selectedFilter) {
+      case 'administradores':
+        filtered = filtered.where((user) => user.role.isAdmin).toList();
+        break;
+      case 'usuarios':
+        filtered = filtered.where((user) => !user.role.isAdmin).toList();
+        break;
+      case 'todos':
+      default:
+        // No filter, show all
+        break;
+    }
+    
+    // Apply search
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((user) {
+        final name = user.displayName?.toLowerCase() ?? '';
+        final email = user.email.toLowerCase();
+        return name.contains(_searchQuery) || email.contains(_searchQuery);
+      }).toList();
+    }
+    
+    return filtered;
+  }
+  
+  Widget _buildSearchAndFilters() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Search Bar
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Buscar por nome ou email',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                          _currentPage = 0;
+                        });
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
+              filled: true,
+              fillColor: AppTheme.backgroundColor,
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          Row(
+            children: [
+              // Filter chips (horizontally scrollable)
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _filters.map((filter) {
+                      final isSelected = _selectedFilter == filter;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(_getFilterDisplayName(filter)),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedFilter = filter;
+                              _currentPage = 0;
+                            });
+                          },
+                          backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+                          selectedColor: AppTheme.primaryColor,
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(width: 16),
+              
+              // Page size selector
+              DropdownButton<int>(
+                value: _pageSize,
+                items: _pageSizes.map((size) {
+                  return DropdownMenuItem(
+                    value: size,
+                    child: Text('$size por página'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _pageSize = value;
+                      _currentPage = 0;
+                    });
+                  }
+                },
+                underline: Container(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  
+  String _getFilterDisplayName(String filter) {
+    switch (filter) {
+      case 'todos':
+        return 'Todos';
+      case 'administradores':
+        return 'Administradores';
+      case 'usuarios':
+        return 'Usuários';
+      default:
+        return filter;
+    }
+  }
+  
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppTheme.neutralGray,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _searchQuery.isNotEmpty 
+                ? 'Nenhum usuário encontrado para "$_searchQuery"'
+                : 'Nenhum usuário encontrado',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _searchQuery.isNotEmpty
+                ? 'Tente uma busca diferente ou ajuste os filtros'
+                : 'Adicione o primeiro usuário para começar',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.neutralGray,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (_searchQuery.isEmpty) ...[
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/admin/users/create'),
+              icon: const Icon(Icons.add),
+              label: const Text('Adicionar Usuário'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildPaginationControls(int totalPages, int totalUsers) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Total: $totalUsers usuários',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.neutralGray,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: _currentPage > 0
+                    ? () => setState(() => _currentPage--)
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Text(
+                '${_currentPage + 1} de $totalPages',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              IconButton(
+                onPressed: _currentPage < totalPages - 1
+                    ? () => setState(() => _currentPage++)
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserCard(BuildContext context, UserModel user) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: _getRoleColor(user.role),
+          child: Text(
+            user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(
+          user.displayName ?? 'Usuário sem nome',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(user.email),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _getRoleColor(user.role).withAlpha(26),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user.role.displayName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _getRoleColor(user.role),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                // Show admin icon for initial admin users
+                if (user.role.isAdmin && user.metadata['isInitialAdmin'] == true) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.verified_user,
+                    size: 16,
+                    color: AppTheme.warningColor,
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) => _handleUserAction(context, user, value),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'edit',
+              child: ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('Editar'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'reset_password',
+              child: ListTile(
+                leading: Icon(Icons.lock_reset),
+                title: Text('Redefinir Senha'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            // Only show deactivate option if not initial admin
+            if (user.metadata['isInitialAdmin'] != true)
+              const PopupMenuItem(
+                value: 'deactivate',
+                child: ListTile(
+                  leading: Icon(Icons.block, color: AppTheme.errorColor),
+                  title: Text('Desativar', style: TextStyle(color: AppTheme.errorColor)),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+          ],
+        ),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  Widget _buildAccessDenied(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Acesso Negado'),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.block,
+              size: 64,
+              color: AppTheme.errorColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Você não tem permissão para acessar esta área',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () => context.go('/dashboard'),
+              child: const Text('Voltar ao Dashboard'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getRoleColor(UserRole role) {
+    return role.when(
+      admin: () => AppTheme.errorColor,
+      owner: () => AppTheme.primaryColor,
+      manager: () => Colors.blue,
+      employee: () => Colors.green,
+      viewer: () => AppTheme.neutralGray,
+    );
+  }
+
+  void _handleUserAction(BuildContext context, UserModel user, String action) {
+    switch (action) {
+      case 'edit':
+        _showComingSoon(context, 'Edição de usuário');
+        break;
+      case 'reset_password':
+        _showComingSoon(context, 'Redefinição de senha');
+        break;
+      case 'deactivate':
+        _showDeactivateConfirmation(context, user);
+        break;
+    }
+  }
+
+  void _showComingSoon(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Em Desenvolvimento'),
+        content: Text('$feature estará disponível em breve.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeactivateConfirmation(BuildContext context, UserModel user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Desativação'),
+        content: Text(
+          'Tem certeza que deseja desativar o usuário ${user.displayName ?? user.email}?\n\n'
+          'Esta ação pode ser revertida posteriormente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showComingSoon(context, 'Desativação de usuário');
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.errorColor,
+            ),
+            child: const Text('Desativar'),
+          ),
+        ],
+      ),
+    );
+  }
+}

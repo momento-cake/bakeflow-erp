@@ -1,15 +1,69 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to read and write their own user document
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
+    // Function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role.type == 'admin';
     }
     
-    // Allow reading users if authenticated (for admin features)
+    // Function to check if user is master admin
+    function isMasterAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role.type == 'admin' &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.metadata.isInitialAdmin == true;
+    }
+    
+    // Function to check if target user is admin
+    function isTargetAdmin(targetUserId) {
+      return exists(/databases/$(database)/documents/users/$(targetUserId)) &&
+             get(/databases/$(database)/documents/users/$(targetUserId)).data.role.type == 'admin';
+    }
+    
+    // Function to check if target user is master admin
+    function isTargetMasterAdmin(targetUserId) {
+      return exists(/databases/$(database)/documents/users/$(targetUserId)) &&
+             get(/databases/$(database)/documents/users/$(targetUserId)).data.role.type == 'admin' &&
+             get(/databases/$(database)/documents/users/$(targetUserId)).data.metadata.isInitialAdmin == true;
+    }
+    
+    // Users collection rules
     match /users/{userId} {
-      allow read: if request.auth != null;
+      // Allow users to read and write their own user document
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow admin users to read all users
+      allow read: if isAdmin();
+      
+      // Allow admin users to create new users
+      allow create: if isAdmin() && request.resource.data.role.type != 'admin';
+      
+      // Allow master admin users to create other admin users
+      allow create: if isMasterAdmin() && request.resource.data.role.type == 'admin' &&
+                       !('isInitialAdmin' in request.resource.data.metadata && request.resource.data.metadata.isInitialAdmin == true);
+      
+      // Allow admin users to update non-admin users
+      allow update: if isAdmin() && !isTargetAdmin(userId);
+      
+      // Allow master admin users to update other admin users (except other master admins)
+      allow update: if isMasterAdmin() && isTargetAdmin(userId) && !isTargetMasterAdmin(userId);
+      
+      // Allow admin users to delete non-admin users
+      allow delete: if isAdmin() && !isTargetAdmin(userId);
+      
+      // Allow master admin users to delete other admin users (except other master admins)
+      allow delete: if isMasterAdmin() && isTargetAdmin(userId) && !isTargetMasterAdmin(userId);
+      
+      // Allow unauthenticated queries to check if admin users exist (for initial setup)
+      allow read: if resource.data.role.type == 'admin';
+      
+      // Allow creation of initial admin user (when no admins exist)
+      allow create: if request.auth != null && 
+        request.resource.data.role.type == 'admin' && 
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
     
     // Business access rules

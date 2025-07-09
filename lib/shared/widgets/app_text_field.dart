@@ -17,6 +17,7 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final TextInputAction textInputAction;
   final String? errorText;
+  final ValueChanged<String>? onFieldSubmitted;
 
   const AppTextField({
     super.key,
@@ -35,6 +36,7 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.textInputAction = TextInputAction.done,
     this.errorText,
+    this.onFieldSubmitted,
   }) : assert(
          (controller != null) ^ (value != null && onChanged != null),
          'Either controller or value/onChanged must be provided, but not both',
@@ -64,6 +66,7 @@ class AppTextField extends StatelessWidget {
           enabled: enabled,
           onTap: onTap,
           textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           decoration: InputDecoration(
             hintText: hintText,
             suffixIcon: suffixIcon,

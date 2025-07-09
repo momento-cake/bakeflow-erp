@@ -999,7 +999,7 @@ class _$LoginFormStateImpl implements _LoginFormState {
       {this.email = '',
       this.password = '',
       this.isLoading = false,
-      this.obscurePassword = false,
+      this.obscurePassword = true,
       this.rememberMe = false,
       this.emailError,
       this.passwordError,

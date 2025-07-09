@@ -1,0 +1,101 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🌐 Debug Web (Default Browser)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost"
+      ]
+    },
+    {
+      "name": "🏹 Debug with Arc Browser",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost"
+      ],
+      "env": {
+        "CHROME_EXECUTABLE": "/Applications/Arc.app/Contents/MacOS/Arc"
+      }
+    },
+    {
+      "name": "🟢 Debug with Chrome",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost"
+      ],
+      "env": {
+        "CHROME_EXECUTABLE": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      }
+    },
+    {
+      "name": "🔵 Debug with Edge",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost"
+      ],
+      "env": {
+        "CHROME_EXECUTABLE": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+      }
+    },
+    {
+      "name": "🔄 Hot Reload (Default)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost",
+        "--hot"
+      ]
+    },
+    {
+      "name": "🔄 Hot Reload (Arc)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "web-server",
+        "--web-port=4000",
+        "--web-hostname=localhost",
+        "--hot"
+      ],
+      "env": {
+        "CHROME_EXECUTABLE": "/Applications/Arc.app/Contents/MacOS/Arc"
+      }
+    },
+    {
+      "name": "💻 macOS Desktop",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "macos"
+      ]
+    }
+  ]
+}

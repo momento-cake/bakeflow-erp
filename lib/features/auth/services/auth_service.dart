@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/models/user_model.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -11,25 +12,27 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
-final currentUserProvider = StreamProvider<UserModel?>((ref) {
+// Simple provider that just returns the Firebase user converted to UserModel
+final currentUserProvider = Provider<UserModel?>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.when(
-    data: (user) {
-      if (user == null) return Stream.value(null);
-      return FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .snapshots()
-          .map((doc) {
-        if (doc.exists) {
-          return UserModel.fromJson(doc.data()!);
-        }
-        return UserModel.fromFirebaseUser(user);
-      });
-    },
-    loading: () => Stream.value(null),
-    error: (_, __) => Stream.value(null),
+    data: (user) => user != null ? UserModel.fromFirebaseUser(user) : null,
+    loading: () => null,
+    error: (_, __) => null,
   );
+});
+
+// Provider for getting full user data from Firestore when needed
+final firestoreUserProvider = FutureProvider.family<UserModel?, String>((ref, uid) async {
+  try {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (doc.exists) {
+      return UserModel.fromJson(doc.data()!);
+    }
+  } catch (e) {
+    rethrow;
+  }
+  return null;
 });
 
 class AuthService {

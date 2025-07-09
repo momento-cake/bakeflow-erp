@@ -409,25 +409,6 @@ abstract class _UserModel implements UserModel {
       throw _privateConstructorUsedError;
 }
 
-UserRole _$UserRoleFromJson(Map<String, dynamic> json) {
-  switch (json['runtimeType']) {
-    case 'admin':
-      return _Admin.fromJson(json);
-    case 'owner':
-      return _Owner.fromJson(json);
-    case 'manager':
-      return _Manager.fromJson(json);
-    case 'employee':
-      return _Employee.fromJson(json);
-    case 'viewer':
-      return _Viewer.fromJson(json);
-
-    default:
-      throw CheckedFromJsonException(json, 'runtimeType', 'UserRole',
-          'Invalid union type "${json['runtimeType']}"!');
-  }
-}
-
 /// @nodoc
 mixin _$UserRole {
   @optionalTypeArgs
@@ -486,9 +467,6 @@ mixin _$UserRole {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
-
-  /// Serializes this UserRole to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -531,15 +509,9 @@ class __$$AdminImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$AdminImpl implements _Admin {
-  const _$AdminImpl({final String? $type}) : $type = $type ?? 'admin';
 
-  factory _$AdminImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AdminImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
+class _$AdminImpl extends _Admin {
+  const _$AdminImpl() : super._();
 
   @override
   String toString() {
@@ -552,7 +524,6 @@ class _$AdminImpl implements _Admin {
         (other.runtimeType == runtimeType && other is _$AdminImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -635,19 +606,11 @@ class _$AdminImpl implements _Admin {
     }
     return orElse();
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$AdminImplToJson(
-      this,
-    );
-  }
 }
 
-abstract class _Admin implements UserRole {
+abstract class _Admin extends UserRole {
   const factory _Admin() = _$AdminImpl;
-
-  factory _Admin.fromJson(Map<String, dynamic> json) = _$AdminImpl.fromJson;
+  const _Admin._() : super._();
 }
 
 /// @nodoc
@@ -670,15 +633,9 @@ class __$$OwnerImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$OwnerImpl implements _Owner {
-  const _$OwnerImpl({final String? $type}) : $type = $type ?? 'owner';
 
-  factory _$OwnerImpl.fromJson(Map<String, dynamic> json) =>
-      _$$OwnerImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
+class _$OwnerImpl extends _Owner {
+  const _$OwnerImpl() : super._();
 
   @override
   String toString() {
@@ -691,7 +648,6 @@ class _$OwnerImpl implements _Owner {
         (other.runtimeType == runtimeType && other is _$OwnerImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -774,19 +730,11 @@ class _$OwnerImpl implements _Owner {
     }
     return orElse();
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$OwnerImplToJson(
-      this,
-    );
-  }
 }
 
-abstract class _Owner implements UserRole {
+abstract class _Owner extends UserRole {
   const factory _Owner() = _$OwnerImpl;
-
-  factory _Owner.fromJson(Map<String, dynamic> json) = _$OwnerImpl.fromJson;
+  const _Owner._() : super._();
 }
 
 /// @nodoc
@@ -809,15 +757,9 @@ class __$$ManagerImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$ManagerImpl implements _Manager {
-  const _$ManagerImpl({final String? $type}) : $type = $type ?? 'manager';
 
-  factory _$ManagerImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ManagerImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
+class _$ManagerImpl extends _Manager {
+  const _$ManagerImpl() : super._();
 
   @override
   String toString() {
@@ -830,7 +772,6 @@ class _$ManagerImpl implements _Manager {
         (other.runtimeType == runtimeType && other is _$ManagerImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -913,19 +854,11 @@ class _$ManagerImpl implements _Manager {
     }
     return orElse();
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ManagerImplToJson(
-      this,
-    );
-  }
 }
 
-abstract class _Manager implements UserRole {
+abstract class _Manager extends UserRole {
   const factory _Manager() = _$ManagerImpl;
-
-  factory _Manager.fromJson(Map<String, dynamic> json) = _$ManagerImpl.fromJson;
+  const _Manager._() : super._();
 }
 
 /// @nodoc
@@ -948,15 +881,9 @@ class __$$EmployeeImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$EmployeeImpl implements _Employee {
-  const _$EmployeeImpl({final String? $type}) : $type = $type ?? 'employee';
 
-  factory _$EmployeeImpl.fromJson(Map<String, dynamic> json) =>
-      _$$EmployeeImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
+class _$EmployeeImpl extends _Employee {
+  const _$EmployeeImpl() : super._();
 
   @override
   String toString() {
@@ -969,7 +896,6 @@ class _$EmployeeImpl implements _Employee {
         (other.runtimeType == runtimeType && other is _$EmployeeImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1052,20 +978,11 @@ class _$EmployeeImpl implements _Employee {
     }
     return orElse();
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$EmployeeImplToJson(
-      this,
-    );
-  }
 }
 
-abstract class _Employee implements UserRole {
+abstract class _Employee extends UserRole {
   const factory _Employee() = _$EmployeeImpl;
-
-  factory _Employee.fromJson(Map<String, dynamic> json) =
-      _$EmployeeImpl.fromJson;
+  const _Employee._() : super._();
 }
 
 /// @nodoc
@@ -1088,15 +1005,9 @@ class __$$ViewerImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$ViewerImpl implements _Viewer {
-  const _$ViewerImpl({final String? $type}) : $type = $type ?? 'viewer';
 
-  factory _$ViewerImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ViewerImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
+class _$ViewerImpl extends _Viewer {
+  const _$ViewerImpl() : super._();
 
   @override
   String toString() {
@@ -1109,7 +1020,6 @@ class _$ViewerImpl implements _Viewer {
         (other.runtimeType == runtimeType && other is _$ViewerImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1192,17 +1102,9 @@ class _$ViewerImpl implements _Viewer {
     }
     return orElse();
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ViewerImplToJson(
-      this,
-    );
-  }
 }
 
-abstract class _Viewer implements UserRole {
+abstract class _Viewer extends UserRole {
   const factory _Viewer() = _$ViewerImpl;
-
-  factory _Viewer.fromJson(Map<String, dynamic> json) = _$ViewerImpl.fromJson;
+  const _Viewer._() : super._();
 }

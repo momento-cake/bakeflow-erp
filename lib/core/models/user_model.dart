@@ -42,14 +42,26 @@ class UserModel with _$UserModel {
 
 @freezed
 class UserRole with _$UserRole {
+  const UserRole._();
+  
   const factory UserRole.admin() = _Admin;
   const factory UserRole.owner() = _Owner;
   const factory UserRole.manager() = _Manager;
   const factory UserRole.employee() = _Employee;
   const factory UserRole.viewer() = _Viewer;
 
-  factory UserRole.fromJson(Map<String, dynamic> json) =>
-      _$UserRoleFromJson(json);
+  factory UserRole.fromJson(Map<String, dynamic> json) {
+    // Handle Firestore format where role is stored as {type: "admin"}
+    if (json.containsKey('type')) {
+      return UserRole.fromString(json['type'] as String);
+    }
+    // Handle Freezed format where role is stored as {runtimeType: "admin"}
+    if (json.containsKey('runtimeType')) {
+      return UserRole.fromString(json['runtimeType'] as String);
+    }
+    // Default to employee if no valid format found
+    return const UserRole.employee();
+  }
 
   static UserRole fromString(String value) {
     switch (value.toLowerCase()) {
@@ -67,6 +79,11 @@ class UserRole with _$UserRole {
         return const UserRole.employee();
     }
   }
+  
+  // Custom toJson to match Firestore format
+  Map<String, dynamic> toJson() => {
+    'type': name,
+  };
 }
 
 extension UserRoleExtension on UserRole {
@@ -141,4 +158,21 @@ extension UserRoleExtension on UserRole {
         employee: () => false,
         viewer: () => true,
       );
+}
+
+extension UserModelExtension on UserModel {
+  bool get isInitialAdmin => metadata['isInitialAdmin'] == true;
+  
+  bool get canDeleteAdmins => role.isAdmin && isInitialAdmin;
+  
+  bool get canBeDeleted => role.isAdmin ? !isInitialAdmin : true;
+  
+  bool get canManageOtherAdmins => role.isAdmin && isInitialAdmin;
+  
+  String get roleDisplayName {
+    if (role.isAdmin && isInitialAdmin) {
+      return '${role.displayName} (Master)';
+    }
+    return role.displayName;
+  }
 }

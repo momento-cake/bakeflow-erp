@@ -1,196 +1,239 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/models/user_model.dart';
-import '../../../core/models/business_model.dart';
 
 final adminUserServiceProvider = Provider<AdminUserService>((ref) {
-  return AdminUserService(
-    firestore: FirebaseFirestore.instance,
-    auth: FirebaseAuth.instance,
-  );
+  return AdminUserService();
+});
+
+final allUsersProvider = StreamProvider<List<UserModel>>((ref) {
+  return ref.read(adminUserServiceProvider).getAllUsers();
 });
 
 class AdminUserService {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  AdminUserService({
-    required FirebaseFirestore firestore,
-    required FirebaseAuth auth,
-  }) : _firestore = firestore,
-        _auth = auth;
+  /// Get all users in the system
+  Stream<List<UserModel>> getAllUsers() {
+    return _firestore
+        .collection('users')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        try {
+          return UserModel.fromJson({
+            'uid': doc.id,
+            ...doc.data(),
+          });
+        } catch (e) {
+          // If parsing fails, create a minimal user model
+          return UserModel(
+            uid: doc.id,
+            email: doc.data()['email'] ?? '',
+            displayName: doc.data()['displayName'],
+            emailVerified: doc.data()['emailVerified'] ?? false,
+            role: const UserRole.employee(),
+            createdAt: DateTime.now(),
+          );
+        }
+      }).toList();
+    });
+  }
 
-  Future<void> createUser({
+  /// Create a new user with admin privileges
+  Future<UserModel> createUser({
     required String email,
+    required String password,
     required String displayName,
-    required String businessId,
     required UserRole role,
-    required String temporaryPassword,
-    required bool requirePasswordReset,
   }) async {
     try {
-      // Create user with temporary password
+      // Create user in Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
-        password: temporaryPassword,
+        password: password,
       );
 
       final user = userCredential.user;
       if (user == null) {
-        throw Exception('Failed to create user');
+        throw Exception('Failed to create user in Firebase Auth');
       }
+
+      // Update the user's display name
+      await user.updateDisplayName(displayName);
 
       // Create user document in Firestore
       final userModel = UserModel(
         uid: user.uid,
         email: email,
         displayName: displayName,
-        photoURL: null,
-        emailVerified: false,
-        businessId: businessId,
+        emailVerified: user.emailVerified,
         role: role,
         createdAt: DateTime.now(),
-        lastSignInAt: null,
-        isActive: true,
-        metadata: {
-          'requirePasswordReset': requirePasswordReset,
-          'temporaryPassword': requirePasswordReset,
-          'createdBy': _auth.currentUser?.uid,
-          'createdAt': DateTime.now().toIso8601String(),
-        },
       );
 
-      await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .set(userModel.toJson());
 
-      // Add user to business authorized users
-      await _firestore.collection('businesses').doc(businessId).update({
-        'authorizedUsers': FieldValue.arrayUnion([user.uid]),
-      });
-
-      // Send password reset email if required
-      if (requirePasswordReset) {
-        await _auth.sendPasswordResetEmail(email: email);
+      return userModel;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'email-already-in-use':
+          throw Exception('Este email já está em uso');
+        case 'invalid-email':
+          throw Exception('Email inválido');
+        case 'weak-password':
+          throw Exception('Senha muito fraca');
+        default:
+          throw Exception('Erro ao criar usuário: ${e.message}');
       }
-
     } catch (e) {
-      throw Exception('Failed to create user: ${e.toString()}');
+      throw Exception('Erro inesperado ao criar usuário: $e');
     }
   }
 
-  Future<void> createBusiness({
-    required String name,
-    required String cnpj,
-    required String address,
-    required String phone,
-    required String email,
-    required String ownerId,
-  }) async {
-    try {
-      final businessId = _firestore.collection('businesses').doc().id;
-      
-      final business = Business(
-        id: businessId,
-        name: name,
-        cnpj: cnpj,
-        address: address,
-        phone: phone,
-        email: email,
-        ownerId: ownerId,
-        authorizedUsers: [ownerId],
-        createdAt: DateTime.now(),
-        isActive: true,
-        settings: {
-          'createdBy': _auth.currentUser?.uid,
-          'createdAt': DateTime.now().toIso8601String(),
-        },
-      );
-
-      await _firestore.collection('businesses').doc(businessId).set(business.toJson());
-
-      // Update owner's business reference
-      await _firestore.collection('users').doc(ownerId).update({
-        'businessId': businessId,
-      });
-
-    } catch (e) {
-      throw Exception('Failed to create business: ${e.toString()}');
-    }
-  }
-
-  Future<List<UserModel>> getAllUsers() async {
-    try {
-      final snapshot = await _firestore.collection('users').get();
-      return snapshot.docs
-          .map((doc) => UserModel.fromJson(doc.data()))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch users: ${e.toString()}');
-    }
-  }
-
-  Future<List<Business>> getAllBusinesses() async {
-    try {
-      final snapshot = await _firestore.collection('businesses').get();
-      return snapshot.docs
-          .map((doc) => Business.fromJson(doc.data()))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch businesses: ${e.toString()}');
-    }
-  }
-
-  Future<void> resetUserPassword(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      throw Exception('Failed to send password reset email: ${e.toString()}');
-    }
-  }
-
-  Future<void> deactivateUser(String userId) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({
-        'isActive': false,
-        'deactivatedAt': DateTime.now().toIso8601String(),
-        'deactivatedBy': _auth.currentUser?.uid,
-      });
-    } catch (e) {
-      throw Exception('Failed to deactivate user: ${e.toString()}');
-    }
-  }
-
-  Future<void> activateUser(String userId) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({
-        'isActive': true,
-        'activatedAt': DateTime.now().toIso8601String(),
-        'activatedBy': _auth.currentUser?.uid,
-      });
-    } catch (e) {
-      throw Exception('Failed to activate user: ${e.toString()}');
-    }
-  }
-
+  /// Update user role
   Future<void> updateUserRole(String userId, UserRole newRole) async {
     try {
       await _firestore.collection('users').doc(userId).update({
         'role': newRole.toJson(),
-        'roleUpdatedAt': DateTime.now().toIso8601String(),
-        'roleUpdatedBy': _auth.currentUser?.uid,
+        'lastSignInAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      throw Exception('Failed to update user role: ${e.toString()}');
+      throw Exception('Erro ao atualizar perfil do usuário: $e');
     }
   }
 
-  String generateTemporaryPassword() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = DateTime.now().millisecondsSinceEpoch;
-    var result = '';
-    for (var i = 0; i < 12; i++) {
-      result += chars[(random + i) % chars.length];
+  /// Update user information
+  Future<void> updateUser({
+    required String userId,
+    String? displayName,
+    UserRole? role,
+  }) async {
+    try {
+      final updates = <String, dynamic>{
+        'lastSignInAt': FieldValue.serverTimestamp(),
+      };
+
+      if (displayName != null) {
+        updates['displayName'] = displayName;
+      }
+
+      if (role != null) {
+        updates['role'] = role.toJson();
+      }
+
+      await _firestore.collection('users').doc(userId).update(updates);
+    } catch (e) {
+      throw Exception('Erro ao atualizar usuário: $e');
     }
-    return result;
+  }
+
+  /// Deactivate user (mark as inactive, don't delete)
+  Future<void> deactivateUser(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'isActive': false,
+        'lastSignInAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Erro ao desativar usuário: $e');
+    }
+  }
+
+  /// Reactivate user
+  Future<void> reactivateUser(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'isActive': true,
+        'lastSignInAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Erro ao reativar usuário: $e');
+    }
+  }
+
+  /// Reset user password (send password reset email)
+  Future<void> resetUserPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          throw Exception('Usuário não encontrado');
+        case 'invalid-email':
+          throw Exception('Email inválido');
+        default:
+          throw Exception('Erro ao enviar email de redefinição: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Erro inesperado ao redefinir senha: $e');
+    }
+  }
+
+  /// Get user by ID
+  Future<UserModel?> getUserById(String userId) async {
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      
+      if (!doc.exists) {
+        return null;
+      }
+
+      return UserModel.fromJson({
+        'uid': doc.id,
+        ...doc.data()!,
+      });
+    } catch (e) {
+      throw Exception('Erro ao buscar usuário: $e');
+    }
+  }
+
+  /// Check if user has admin privileges
+  Future<bool> isUserAdmin(String userId) async {
+    try {
+      final user = await getUserById(userId);
+      return user?.role.isAdmin ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Count total users by role
+  Future<Map<String, int>> getUserCountByRole() async {
+    try {
+      final snapshot = await _firestore.collection('users').get();
+      final counts = <String, int>{
+        'admin': 0,
+        'owner': 0,
+        'manager': 0,
+        'employee': 0,
+        'viewer': 0,
+      };
+
+      for (final doc in snapshot.docs) {
+        try {
+          final user = UserModel.fromJson({
+            'uid': doc.id,
+            ...doc.data(),
+          });
+          final roleName = user.role.name;
+          counts[roleName] = (counts[roleName] ?? 0) + 1;
+        } catch (e) {
+          // Skip invalid user documents
+          continue;
+        }
+      }
+
+      return counts;
+    } catch (e) {
+      throw Exception('Erro ao contar usuários: $e');
+    }
   }
 }

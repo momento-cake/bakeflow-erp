@@ -91,6 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscureText: formState.obscurePassword,
                       textInputAction: TextInputAction.done,
                       errorText: formState.passwordError,
+                      onFieldSubmitted: (_) => _signIn(),
                       suffixIcon: IconButton(
                         icon: Icon(
                           formState.obscurePassword 

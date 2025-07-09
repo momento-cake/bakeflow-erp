@@ -136,8 +136,11 @@ For detailed feature roadmap, timelines, and implementation phases, refer to **[
 
 ### Development
 ```bash
-# Start development server
+# Start development server (web)
 fvm flutter run -d web-server --web-port=3000
+
+# Start development server (macOS desktop)
+fvm flutter run -d macos
 
 # Run tests
 fvm flutter test
@@ -145,8 +148,11 @@ fvm flutter test
 # Code analysis
 fvm flutter analyze
 
-# Build for production
+# Build for production (web)
 fvm flutter build web --release
+
+# Build for production (macOS)
+fvm flutter build macos --release
 ```
 
 ### Deployment & Infrastructure
@@ -163,8 +169,13 @@ The project uses Firebase Hosting with GitHub Actions for automated CI/CD. For c
 
 ### Quick Commands
 ```bash
-# Development
+# Development (web)
 fvm flutter run -d web-server --web-port=3000
+
+# Development (macOS desktop) - faster debugging
+fvm flutter run -d macos
+
+# Testing and analysis
 fvm flutter test
 fvm flutter analyze
 

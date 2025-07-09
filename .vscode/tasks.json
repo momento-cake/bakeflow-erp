@@ -1,0 +1,219 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Flutter: Run Web (Dev)",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "run",
+        "-d",
+        "web-server",
+        "--web-port=3000",
+        "--web-hostname=localhost"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$dart-flutter"
+      ],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Flutter: Run Chrome (Debug)",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "run",
+        "-d",
+        "chrome",
+        "--web-port=3000",
+        "--web-hostname=localhost",
+        "--debug"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$dart-flutter"
+      ]
+    },
+    {
+      "label": "Flutter: Build Web",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "build",
+        "web"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$dart-flutter"
+      ]
+    },
+    {
+      "label": "Flutter: Clean",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "clean"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Flutter: Get Dependencies",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "pub",
+        "get"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Flutter: Analyze",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "analyze"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$dart-flutter"
+      ]
+    },
+    {
+      "label": "Flutter: Test",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "flutter",
+        "test"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$dart-flutter"
+      ]
+    },
+    {
+      "label": "Build Runner: Build",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "dart",
+        "run",
+        "build_runner",
+        "build"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Build Runner: Watch",
+      "type": "shell",
+      "command": "fvm",
+      "args": [
+        "dart",
+        "run",
+        "build_runner",
+        "watch"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Firebase: Deploy",
+      "type": "shell",
+      "command": "firebase",
+      "args": [
+        "deploy",
+        "--only",
+        "hosting"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "dependsOn": "Flutter: Build Web"
+    },
+    {
+      "label": "Firebase: Serve",
+      "type": "shell",
+      "command": "firebase",
+      "args": [
+        "serve",
+        "--only",
+        "hosting"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "dependsOn": "Flutter: Build Web"
+    }
+  ]
+}
