@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../app/themes/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
@@ -29,7 +30,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
 
     final success = await ref.read(registerFormViewModelProvider.notifier).register();
-    
+
     if (success && mounted) {
       context.go('/dashboard');
     }
@@ -39,7 +40,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final formState = ref.watch(registerFormViewModelProvider);
     final formNotifier = ref.watch(registerFormViewModelProvider.notifier);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth >= 768;
 
     return Scaffold(
@@ -63,7 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(height: isDesktop ? 60 : 40),
-                    
+
                     // Logo and title
                     Icon(
                       Icons.cake,
@@ -74,16 +75,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       'Criar conta',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppTheme.spacingSmall),
                     Text(
                       'Comece a usar o BakeFlow ERP hoje',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.neutralGray,
-                      ),
+                            color: AppTheme.neutralGray,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppTheme.spacingXLarge),
@@ -92,11 +93,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       'Informações pessoais',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Nome completo',
                       value: formState.displayName,
@@ -106,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       errorText: formState.displayNameError,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'E-mail',
                       value: formState.email,
@@ -116,7 +117,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       errorText: formState.emailError,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Senha',
                       value: formState.password,
@@ -126,15 +127,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       errorText: formState.passwordError,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          formState.obscurePassword 
-                              ? Icons.visibility 
-                              : Icons.visibility_off,
+                          formState.obscurePassword ? Icons.visibility : Icons.visibility_off,
                         ),
                         onPressed: formNotifier.togglePasswordVisibility,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Confirmar senha',
                       value: formState.confirmPassword,
@@ -144,8 +143,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       errorText: formState.confirmPasswordError,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          formState.obscureConfirmPassword 
-                              ? Icons.visibility 
+                          formState.obscureConfirmPassword
+                              ? Icons.visibility
                               : Icons.visibility_off,
                         ),
                         onPressed: formNotifier.toggleConfirmPasswordVisibility,
@@ -157,11 +156,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       'Informações da empresa',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Nome da empresa',
                       value: formState.businessName,
@@ -171,7 +170,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       errorText: formState.businessNameError,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     // CNPJ and Phone row for desktop
                     if (isDesktop) ...[
                       Row(
@@ -213,7 +212,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: '00.000.000/0000-00',
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
-                      
+
                       AppTextField(
                         labelText: 'Telefone (opcional)',
                         value: formState.phone,
@@ -225,7 +224,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ],
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Endereço (opcional)',
                       value: formState.address,
@@ -286,7 +285,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       isLoading: formState.isLoading,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     // Back to login
                     TextButton(
                       onPressed: () => context.go('/login'),

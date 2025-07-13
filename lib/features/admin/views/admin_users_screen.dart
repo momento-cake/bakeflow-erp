@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +25,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   String _selectedFilter = 'todos';
   int _pageSize = 20;
   int _currentPage = 0;
-  
-  final List<String> _filters = ['todos', 'administradores', 'usuarios'];
+
+  final List<String> _filters = ['todos', 'administradores', 'usuarios', 'ativos', 'desativados'];
   final List<int> _pageSizes = [20, 50, 100];
 
   @override
@@ -43,7 +45,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   void _onSearchChanged() {
     // Cancel previous timer
     _searchTimer?.cancel();
-    
+
     // Start new timer with 300ms delay (throttling)
     _searchTimer = Timer(const Duration(milliseconds: 300), () {
       if (mounted) {
@@ -58,7 +60,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -66,7 +68,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     }
 
     final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
-    
+
     return firestoreUser.when(
       data: (user) => _buildScreen(context, user ?? currentUser),
       loading: () => const Scaffold(
@@ -82,6 +84,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
       return _buildAccessDenied(context);
     }
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth <= 600;
     final usersAsync = ref.watch(allUsersProvider);
 
     return Scaffold(
@@ -97,22 +101,32 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
             showBackButton: true,
             fallbackRoute: '/dashboard',
             actions: [
-              // Add User Button with explicit text
+              // Add User Button - responsive design
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: ElevatedButton.icon(
-                  onPressed: () => context.push('/admin/users/create'),
-                  icon: Icon(Icons.add, color: Colors.white),
-                  label: const Text(
-                    'Adicionar Usuário',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accentColor,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                  ),
-                ),
+                child: isMobile
+                    ? IconButton(
+                        onPressed: () => context.go('/admin/users/create'),
+                        icon: const Icon(Icons.add, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppTheme.accentColor,
+                          padding: const EdgeInsets.all(12),
+                        ),
+                        tooltip: 'Adicionar Usuário',
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: () => context.go('/admin/users/create'),
+                        icon: const Icon(Icons.add, color: Colors.white),
+                        label: const Text(
+                          'Adicionar Usuário',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.accentColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                        ),
+                      ),
               ),
             ],
           ),
@@ -138,8 +152,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                     Text(
                       error.toString(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.neutralGray,
-                      ),
+                            color: AppTheme.neutralGray,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -160,23 +174,23 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   Widget _buildUsersList(BuildContext context, List<UserModel> allUsers) {
     // Apply filters and search
     List<UserModel> filteredUsers = _applyFilters(allUsers);
-    
+
     // Apply pagination
     final totalUsers = filteredUsers.length;
     final totalPages = (totalUsers / _pageSize).ceil();
     final startIndex = _currentPage * _pageSize;
     final endIndex = (startIndex + _pageSize).clamp(0, totalUsers);
-    
+
     final paginatedUsers = filteredUsers.sublist(
       startIndex.clamp(0, totalUsers),
       endIndex,
     );
-    
+
     return Column(
       children: [
         // Search and Filter Section
         _buildSearchAndFilters(),
-        
+
         // Users List
         Expanded(
           child: paginatedUsers.isEmpty
@@ -195,16 +209,16 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                   ),
                 ),
         ),
-        
+
         // Pagination Controls
         if (totalPages > 1) _buildPaginationControls(totalPages, totalUsers),
       ],
     );
   }
-  
+
   List<UserModel> _applyFilters(List<UserModel> users) {
     List<UserModel> filtered = users;
-    
+
     // Apply role filter
     switch (_selectedFilter) {
       case 'administradores':
@@ -213,12 +227,18 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
       case 'usuarios':
         filtered = filtered.where((user) => !user.role.isAdmin).toList();
         break;
+      case 'ativos':
+        filtered = filtered.where((user) => user.isActive).toList();
+        break;
+      case 'desativados':
+        filtered = filtered.where((user) => !user.isActive).toList();
+        break;
       case 'todos':
       default:
         // No filter, show all
         break;
     }
-    
+
     // Apply search
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((user) {
@@ -227,10 +247,10 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         return name.contains(_searchQuery) || email.contains(_searchQuery);
       }).toList();
     }
-    
+
     return filtered;
   }
-  
+
   Widget _buildSearchAndFilters() {
     return Container(
       color: Colors.white,
@@ -262,69 +282,96 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               fillColor: AppTheme.backgroundColor,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
-          Row(
-            children: [
-              // Filter chips (horizontally scrollable)
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+
+          // Horizontally scrollable filters and page size selector
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // Filter chips
+                ..._filters.map((filter) {
+                  final isSelected = _selectedFilter == filter;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(_getFilterDisplayName(filter)),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedFilter = filter;
+                          _currentPage = 0;
+                        });
+                      },
+                      backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+                      selectedColor: AppTheme.primaryColor,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(width: 16),
+
+                // Page size selector styled as a card
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: AppTheme.neutralGray.withAlpha(77)),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  ),
                   child: Row(
-                    children: _filters.map((filter) {
-                      final isSelected = _selectedFilter == filter;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(_getFilterDisplayName(filter)),
-                          selected: isSelected,
-                          onSelected: (selected) {
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.view_list,
+                        size: 16,
+                        color: AppTheme.neutralGray,
+                      ),
+                      const SizedBox(width: 6),
+                      DropdownButton<int>(
+                        value: _pageSize,
+                        items: _pageSizes.map((size) {
+                          return DropdownMenuItem(
+                            value: size,
+                            child: Text(
+                              '$size por página',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppTheme.neutralGray,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
                             setState(() {
-                              _selectedFilter = filter;
+                              _pageSize = value;
                               _currentPage = 0;
                             });
-                          },
-                          backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
-                          selectedColor: AppTheme.primaryColor,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                          ),
+                          }
+                        },
+                        underline: Container(),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.neutralGray,
                         ),
-                      );
-                    }).toList(),
+                        isDense: true,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              
-              const SizedBox(width: 16),
-              
-              // Page size selector
-              DropdownButton<int>(
-                value: _pageSize,
-                items: _pageSizes.map((size) {
-                  return DropdownMenuItem(
-                    value: size,
-                    child: Text('$size por página'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _pageSize = value;
-                      _currentPage = 0;
-                    });
-                  }
-                },
-                underline: Container(),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-  
+
   String _getFilterDisplayName(String filter) {
     switch (filter) {
       case 'todos':
@@ -333,11 +380,15 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         return 'Administradores';
       case 'usuarios':
         return 'Usuários';
+      case 'ativos':
+        return 'Ativos';
+      case 'desativados':
+        return 'Desativados';
       default:
         return filter;
     }
   }
-  
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
@@ -350,7 +401,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _searchQuery.isNotEmpty 
+            _searchQuery.isNotEmpty
                 ? 'Nenhum usuário encontrado para "$_searchQuery"'
                 : 'Nenhum usuário encontrado',
             style: Theme.of(context).textTheme.titleMedium,
@@ -362,14 +413,14 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                 ? 'Tente uma busca diferente ou ajuste os filtros'
                 : 'Adicione o primeiro usuário para começar',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.neutralGray,
-            ),
+                  color: AppTheme.neutralGray,
+                ),
             textAlign: TextAlign.center,
           ),
           if (_searchQuery.isEmpty) ...[
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.push('/admin/users/create'),
+              onPressed: () => context.go('/admin/users/create'),
               icon: const Icon(Icons.add),
               label: const Text('Adicionar Usuário'),
             ),
@@ -378,7 +429,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
       ),
     );
   }
-  
+
   Widget _buildPaginationControls(int totalPages, int totalUsers) {
     return Container(
       color: Colors.white,
@@ -389,15 +440,13 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
           Text(
             'Total: $totalUsers usuários',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.neutralGray,
-            ),
+                  color: AppTheme.neutralGray,
+                ),
           ),
           Row(
             children: [
               IconButton(
-                onPressed: _currentPage > 0
-                    ? () => setState(() => _currentPage--)
-                    : null,
+                onPressed: _currentPage > 0 ? () => setState(() => _currentPage--) : null,
                 icon: const Icon(Icons.chevron_left),
               ),
               Text(
@@ -405,9 +454,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               IconButton(
-                onPressed: _currentPage < totalPages - 1
-                    ? () => setState(() => _currentPage++)
-                    : null,
+                onPressed:
+                    _currentPage < totalPages - 1 ? () => setState(() => _currentPage++) : null,
                 icon: const Icon(Icons.chevron_right),
               ),
             ],
@@ -458,6 +506,23 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                // Show status badge (active/disabled)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: user.isActive ? Colors.green.withAlpha(26) : Colors.red.withAlpha(26),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user.isActive ? 'Ativo' : 'Desativado',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: user.isActive ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 // Show admin icon for initial admin users
                 if (user.role.isAdmin && user.metadata['isInitialAdmin'] == true) ...[
                   const SizedBox(width: 8),
@@ -490,13 +555,21 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
-            // Only show deactivate option if not initial admin
+            // Only show disable/enable option if not initial admin
             if (user.metadata['isInitialAdmin'] != true)
-              const PopupMenuItem(
-                value: 'deactivate',
+              PopupMenuItem(
+                value: user.isActive ? 'disable' : 'enable',
                 child: ListTile(
-                  leading: Icon(Icons.block, color: AppTheme.errorColor),
-                  title: Text('Desativar', style: TextStyle(color: AppTheme.errorColor)),
+                  leading: Icon(
+                    user.isActive ? Icons.block : Icons.check_circle,
+                    color: user.isActive ? AppTheme.errorColor : Colors.green,
+                  ),
+                  title: Text(
+                    user.isActive ? 'Desativar' : 'Ativar',
+                    style: TextStyle(
+                      color: user.isActive ? AppTheme.errorColor : Colors.green,
+                    ),
+                  ),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -543,10 +616,14 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   Color _getRoleColor(UserRole role) {
     return role.when(
       admin: () => AppTheme.errorColor,
+      viewer: () => AppTheme.neutralGray,
+      companyAdmin: () => AppTheme.primaryColor,
+      companyManager: () => Colors.blue,
+      companyEmployee: () => Colors.green,
+      // Legacy support
       owner: () => AppTheme.primaryColor,
       manager: () => Colors.blue,
       employee: () => Colors.green,
-      viewer: () => AppTheme.neutralGray,
     );
   }
 
@@ -558,8 +635,11 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
       case 'reset_password':
         _showComingSoon(context, 'Redefinição de senha');
         break;
-      case 'deactivate':
-        _showDeactivateConfirmation(context, user);
+      case 'disable':
+        _showDisableConfirmation(context, user);
+        break;
+      case 'enable':
+        _showEnableConfirmation(context, user);
         break;
     }
   }
@@ -580,14 +660,15 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     );
   }
 
-  void _showDeactivateConfirmation(BuildContext context, UserModel user) {
+
+  void _showDisableConfirmation(BuildContext context, UserModel user) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Desativação'),
         content: Text(
           'Tem certeza que deseja desativar o usuário ${user.displayName ?? user.email}?\n\n'
-          'Esta ação pode ser revertida posteriormente.',
+          'O usuário não conseguirá mais fazer login no sistema até ser reativado.',
         ),
         actions: [
           TextButton(
@@ -595,14 +676,223 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              _showComingSoon(context, 'Desativação de usuário');
+              
+              // Use a stable context reference
+              final scaffoldContext = context;
+              
+              // Show loading dialog with timeout protection
+              showDialog(
+                context: scaffoldContext,
+                barrierDismissible: false,
+                builder: (dialogContext) => const AlertDialog(
+                  content: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(width: 16),
+                      Text('Desativando usuário...'),
+                    ],
+                  ),
+                ),
+              );
+
+              try {
+                html.window.console.log('UI: Starting user disabling for ${user.uid}');
+                
+                // Disable user with timeout
+                await ref.read(adminUserServiceProvider).disableUser(user.uid).timeout(
+                  const Duration(seconds: 30),
+                  onTimeout: () {
+                    throw Exception('Operação expirou. Tente novamente.');
+                  },
+                );
+                
+                html.window.console.log('UI: User disabling completed successfully');
+                
+                // Close loading dialog safely
+                if (scaffoldContext.mounted) {
+                  Navigator.of(scaffoldContext, rootNavigator: true).pop();
+                }
+                
+                // Show success message
+                if (scaffoldContext.mounted) {
+                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Usuário desativado com sucesso'),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+                
+                // Stream should auto-update, but invalidate for safety
+                ref.invalidate(allUsersProvider);
+                
+              } catch (e) {
+                html.window.console.error('UI: Error during user disabling: $e');
+                
+                // Close loading dialog safely
+                if (scaffoldContext.mounted) {
+                  Navigator.of(scaffoldContext, rootNavigator: true).pop();
+                }
+                
+                // Show error message with more details
+                if (scaffoldContext.mounted) {
+                  final errorMessage = e.toString().replaceFirst('Exception: ', '');
+                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao desativar usuário: $errorMessage'),
+                      backgroundColor: AppTheme.errorColor,
+                      duration: const Duration(seconds: 5),
+                      action: SnackBarAction(
+                        label: 'Detalhes',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          showDialog(
+                            context: scaffoldContext,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Erro de Desativação'),
+                              content: Text('Erro completo:\n$e'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }
+              }
             },
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.errorColor,
             ),
             child: const Text('Desativar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnableConfirmation(BuildContext context, UserModel user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Ativação'),
+        content: Text(
+          'Tem certeza que deseja reativar o usuário ${user.displayName ?? user.email}?\n\n'
+          'O usuário poderá fazer login no sistema novamente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              // Use a stable context reference
+              final scaffoldContext = context;
+              
+              // Show loading dialog with timeout protection
+              showDialog(
+                context: scaffoldContext,
+                barrierDismissible: false,
+                builder: (dialogContext) => const AlertDialog(
+                  content: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(width: 16),
+                      Text('Ativando usuário...'),
+                    ],
+                  ),
+                ),
+              );
+
+              try {
+                html.window.console.log('UI: Starting user enabling for ${user.uid}');
+                
+                // Enable user with timeout
+                await ref.read(adminUserServiceProvider).enableUser(user.uid).timeout(
+                  const Duration(seconds: 30),
+                  onTimeout: () {
+                    throw Exception('Operação expirou. Tente novamente.');
+                  },
+                );
+                
+                html.window.console.log('UI: User enabling completed successfully');
+                
+                // Close loading dialog safely
+                if (scaffoldContext.mounted) {
+                  Navigator.of(scaffoldContext, rootNavigator: true).pop();
+                }
+                
+                // Show success message
+                if (scaffoldContext.mounted) {
+                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Usuário ativado com sucesso'),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+                
+                // Stream should auto-update, but invalidate for safety
+                ref.invalidate(allUsersProvider);
+                
+              } catch (e) {
+                html.window.console.error('UI: Error during user enabling: $e');
+                
+                // Close loading dialog safely
+                if (scaffoldContext.mounted) {
+                  Navigator.of(scaffoldContext, rootNavigator: true).pop();
+                }
+                
+                // Show error message with more details
+                if (scaffoldContext.mounted) {
+                  final errorMessage = e.toString().replaceFirst('Exception: ', '');
+                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao ativar usuário: $errorMessage'),
+                      backgroundColor: AppTheme.errorColor,
+                      duration: const Duration(seconds: 5),
+                      action: SnackBarAction(
+                        label: 'Detalhes',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          showDialog(
+                            context: scaffoldContext,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Erro de Ativação'),
+                              content: Text('Erro completo:\n$e'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.green,
+            ),
+            child: const Text('Ativar'),
           ),
         ],
       ),

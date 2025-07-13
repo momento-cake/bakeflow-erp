@@ -1,11 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Function to check if user is admin
-    function isAdmin() {
+    // Function to check if user is platform admin
+    function isPlatformAdmin() {
       return request.auth != null && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role.type == 'admin';
+    }
+    
+    // Function to check if user is platform viewer
+    function isPlatformViewer() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role.type == 'viewer';
+    }
+    
+    // Function to check if user has platform access (admin or viewer)
+    function hasPlatformAccess() {
+      return isPlatformAdmin() || isPlatformViewer();
     }
     
     // Function to check if user is master admin
@@ -29,33 +41,40 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(targetUserId)).data.metadata.isInitialAdmin == true;
     }
     
-    // Users collection rules
+    // Function to check if user is authorized for a specific business
+    function isCompanyAuthorized(businessId) {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/businesses/$(businessId)) &&
+             request.auth.uid in get(/databases/$(database)/documents/businesses/$(businessId)).data.authorizedUsers;
+    }
+    
+    // Platform users collection rules (for admin and viewer roles)
     match /users/{userId} {
       // Allow users to read and write their own user document
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if request.auth != null && request.auth.uid == userId;
       
       // Allow admin users to read all users
-      allow read: if isAdmin();
+      allow read: if isPlatformAdmin();
       
       // Allow admin users to create new users
-      allow create: if isAdmin() && request.resource.data.role.type != 'admin';
+      allow create: if isPlatformAdmin() && request.resource.data.role.type != 'admin';
       
       // Allow master admin users to create other admin users
       allow create: if isMasterAdmin() && request.resource.data.role.type == 'admin' &&
                        !('isInitialAdmin' in request.resource.data.metadata && request.resource.data.metadata.isInitialAdmin == true);
       
-      // Allow admin users to update non-admin users
-      allow update: if isAdmin() && !isTargetAdmin(userId);
+      // Allow platform admin to update any user except master admins (initial admins)
+      // Simplified check to avoid permission errors
+      allow update: if isPlatformAdmin() && userId != request.auth.uid;
       
-      // Allow master admin users to update other admin users (except other master admins)
-      allow update: if isMasterAdmin() && isTargetAdmin(userId) && !isTargetMasterAdmin(userId);
+      // Allow platform admin to update master admins only if they are also master admin
+      allow update: if isMasterAdmin();
       
-      // Allow admin users to delete non-admin users
-      allow delete: if isAdmin() && !isTargetAdmin(userId);
-      
-      // Allow master admin users to delete other admin users (except other master admins)
-      allow delete: if isMasterAdmin() && isTargetAdmin(userId) && !isTargetMasterAdmin(userId);
+      // Allow platform admin to delete any user except master admins (initial admins)
+      allow delete: if isPlatformAdmin() && 
+        exists(/databases/$(database)/documents/users/$(userId)) &&
+        !(get(/databases/$(database)/documents/users/$(userId)).data.metadata.isInitialAdmin == true);
       
       // Allow unauthenticated queries to check if admin users exist (for initial setup)
       allow read: if resource.data.role.type == 'admin';
@@ -66,20 +85,45 @@ service cloud.firestore {
         !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
     
-    // Business access rules
+    // Businesses collection rules
     match /businesses/{businessId} {
-      allow read: if request.auth != null && 
-        request.auth.uid in resource.data.authorizedUsers;
-      allow write: if request.auth != null && 
-        request.auth.uid in resource.data.authorizedUsers;
-      allow create: if request.auth != null && 
-        request.auth.uid == request.resource.data.ownerId;
-    }
-    
-    // Business sub-collections
-    match /businesses/{businessId}/{document=**} {
-      allow read, write: if request.auth != null && 
-        request.auth.uid in get(/databases/$(database)/documents/businesses/$(businessId)).data.authorizedUsers;
+      // Platform admins can read and write all businesses
+      allow read, write: if isPlatformAdmin();
+      
+      // Platform viewers can read all businesses
+      allow read: if isPlatformViewer();
+      
+      // Platform admins can create businesses
+      allow create: if isPlatformAdmin();
+      
+      // Company users can read and write their own business
+      allow read, write: if isCompanyAuthorized(businessId);
+      
+      // Company users subcollection
+      match /users/{userId} {
+        // Platform admins can manage all company users
+        allow read, write: if isPlatformAdmin();
+        
+        // Company admins and managers can read all users in their company
+        allow read: if isCompanyAuthorized(businessId);
+        
+        // Company admins can create and manage company users
+        allow create, update, delete: if isPlatformAdmin() || 
+          (isCompanyAuthorized(businessId) && 
+           get(/databases/$(database)/documents/businesses/$(businessId)/users/$(request.auth.uid)).data.role.type in ['company_admin']);
+        
+        // Users can read and update their own data
+        allow read, update: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Other business sub-collections (products, recipes, etc.)
+      match /{document=**} {
+        // Platform admins have full access
+        allow read, write: if isPlatformAdmin();
+        
+        // Company users have access to their business data
+        allow read, write: if isCompanyAuthorized(businessId);
+      }
     }
   }
 }

@@ -8,8 +8,8 @@
 **Technology Stack**: Flutter Web (Firebase backend)  
 **Primary Goal**: Recipe costing, pricing optimization, and inventory management
 
-**Live Application**: https://bakeflow-erp.web.app  
-**Repository**: https://github.com/momento-cake/bakeflow-erp
+**Live Application**: <https://bakeflow-erp.web.app>  
+**Repository**: <https://github.com/momento-cake/bakeflow-erp>
 
 ## Documentation Structure
 
@@ -75,6 +75,7 @@ features/[feature_name]/
 ### Firebase Configuration
 
 #### Database Structure
+
 ```
 firestore/
 ├── businesses/{businessId}/
@@ -91,6 +92,7 @@ firestore/
 ```
 
 #### Security Rules Template
+
 ```javascript
 // Firestore Rules
 match /businesses/{businessId} {
@@ -109,6 +111,7 @@ match /businesses/{businessId} {
 For detailed feature roadmap, timelines, and implementation phases, refer to **[Implementation Roadmap](docs/roadmap.md)**.
 
 ### Current Status Summary
+
 - **Phase 1 Foundation**: In progress (Authentication ✅, Ingredient Management 🚧)
 - **Firebase Services**: Needs console configuration
 - **Next Priority**: Complete ingredient management system
@@ -117,17 +120,20 @@ For detailed feature roadmap, timelines, and implementation phases, refer to **[
 ## Business Logic Rules
 
 ### Pricing Guidelines
+
 - **Minimum Margin**: 100% (2x ingredient cost)
 - **Suggested Margin**: 150-200% depending on category
 - **Premium Products**: 200-300% margin
 - **Seasonal Adjustment**: +20-50% for holiday items
 
 ### Inventory Management
+
 - **Perishables**: Alert 2 days before expiration
 - **Reorder Point**: When stock < 2x weekly average usage
 - **Waste Tracking**: Log expired/damaged items for cost analysis
 
 ### Recipe Scaling
+
 - **Linear Scaling**: Most ingredients scale proportionally
 - **Non-linear Items**: Yeast, salt, baking powder (use lookup tables)
 - **Yield Variance**: ±5% acceptable variance in production
@@ -135,6 +141,7 @@ For detailed feature roadmap, timelines, and implementation phases, refer to **[
 ## Commands Reference
 
 ### Development
+
 ```bash
 # Start development server (web)
 fvm flutter run -d web-server --web-port=3000
@@ -168,6 +175,7 @@ The project uses Firebase Hosting with GitHub Actions for automated CI/CD. For c
 **Refer to: [Deployment & Infrastructure](docs/deployment-infrastructure.md)** for complete deployment specifications.
 
 ### Quick Commands
+
 ```bash
 # Development (web)
 fvm flutter run -d web-server --web-port=3000
@@ -190,12 +198,14 @@ git push origin main
 ## Testing Strategy
 
 ### Test Coverage
+
 - **Unit Tests**: Business logic, calculations, utility functions
 - **Widget Tests**: UI components and user interactions
 - **Integration Tests**: Firebase integration and complete workflows
 - **Manual Testing**: Cross-browser compatibility and user experience
 
 ### Testing Commands
+
 ```bash
 # Run all tests
 fvm flutter test
@@ -228,21 +238,22 @@ For detailed implementation roadmap with timelines and priorities, see **[Implem
 
 ## Support and Resources
 
-- **Flutter Documentation**: https://docs.flutter.dev/
-- **Firebase Documentation**: https://firebase.google.com/docs
-- **Riverpod Documentation**: https://riverpod.dev/
-- **Material Design 3**: https://m3.material.io/
+- **Flutter Documentation**: <https://docs.flutter.dev/>
+- **Firebase Documentation**: <https://firebase.google.com/docs>
+- **Riverpod Documentation**: <https://riverpod.dev/>
+- **Material Design 3**: <https://m3.material.io/>
 
 ## AI Development Guidelines
 
 **Role**: Master Software Architect & Full-Stack Developer with complete project ownership
 
 **Key Responsibilities**:
+
 - Autonomous development within established guidelines
 - Maintain clean commit history and require user approval for commits
-- Configure Firebase services using momentocake@gmail.com account
+- Configure Firebase services using <momentocake@gmail.com> account
 - Test thoroughly before any changes and verify results
-- Work within GitHub organization: https://github.com/momento-cake
+- Work within GitHub organization: <https://github.com/momento-cake>
 - Follow established patterns and maintain codebase consistency
 - Prioritize user experience with mobile-first design
 - Implement proper error handling and user feedback
@@ -251,3 +262,5 @@ For detailed implementation roadmap with timelines and priorities, see **[Implem
 **MCP Integration**: Use Model Context Protocol servers to access current documentation for Flutter, Firebase, and related libraries. Refer to [MCP Usage Guide](docs/mcp.md) for Context7 server integration patterns, security considerations, and best practices for accessing up-to-date library documentation beyond training cutoff.
 
 **Detailed Guidelines**: All development standards, code principles, security requirements, and workflow processes are documented in [Development Workflow](docs/development-workflow.md).
+
+**Backwards Compatibillity**: This is a new project so you don't need to worry about it at all

@@ -1,5 +1,9 @@
+import 'dart:developer' as developer;
+import 'dart:html' as html;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/user_model.dart';
@@ -16,6 +20,14 @@ class AdminUserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// Helper method to log to browser console
+  void _log(String message) {
+    // Log to browser console
+    html.window.console.log('AdminUserService: $message');
+    // Also log to developer console
+    developer.log(message, name: 'AdminUserService');
+  }
+
   /// Get all users in the system
   Stream<List<UserModel>> getAllUsers() {
     return _firestore
@@ -25,10 +37,14 @@ class AdminUserService {
         .map((snapshot) {
       return snapshot.docs.map((doc) {
         try {
-          return UserModel.fromJson({
+          final data = doc.data();
+          // Ensure isActive field exists with default value
+          final userData = {
             'uid': doc.id,
-            ...doc.data(),
-          });
+            'isActive': data['isActive'] ?? true, // Default to active if not set
+            ...data,
+          };
+          return UserModel.fromJson(userData);
         } catch (e) {
           // If parsing fails, create a minimal user model
           return UserModel(
@@ -38,6 +54,7 @@ class AdminUserService {
             emailVerified: doc.data()['emailVerified'] ?? false,
             role: const UserRole.employee(),
             createdAt: DateTime.now(),
+            isActive: doc.data()['isActive'] ?? true, // Default to active
           );
         }
       }).toList();
@@ -52,36 +69,76 @@ class AdminUserService {
     required UserRole role,
   }) async {
     try {
-      // Create user in Firebase Auth
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      final user = userCredential.user;
-      if (user == null) {
-        throw Exception('Failed to create user in Firebase Auth');
+      // Store current admin user credentials to restore session
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Admin user must be authenticated to create users');
       }
 
-      // Update the user's display name
-      await user.updateDisplayName(displayName);
+      final currentUserEmail = currentUser.email;
+      final currentUserId = currentUser.uid;
 
-      // Create user document in Firestore
-      final userModel = UserModel(
-        uid: user.uid,
-        email: email,
-        displayName: displayName,
-        emailVerified: user.emailVerified,
-        role: role,
-        createdAt: DateTime.now(),
+      // Create a temporary Firebase App instance for user creation
+      // This prevents the main app session from being affected
+      final secondaryApp = await Firebase.initializeApp(
+        name: 'tempUserCreation${DateTime.now().millisecondsSinceEpoch}',
+        options: Firebase.app().options,
       );
 
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userModel.toJson());
+      try {
+        final secondaryAuth = FirebaseAuth.instanceFor(app: secondaryApp);
 
-      return userModel;
+        // Create user in the secondary Firebase Auth instance
+        final userCredential = await secondaryAuth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+
+        final user = userCredential.user;
+        if (user == null) {
+          throw Exception('Failed to create user in Firebase Auth');
+        }
+
+        // Update the user's display name
+        await user.updateDisplayName(displayName);
+
+        // Create user document in Firestore with proper timestamp
+        final userModel = UserModel(
+          uid: user.uid,
+          email: email,
+          displayName: displayName,
+          emailVerified: user.emailVerified,
+          role: role,
+          createdAt: DateTime.now(),
+          metadata: {
+            'requiresPasswordChange': true,
+            'createdByAdmin': true,
+            'createdByAdminEmail': currentUserEmail,
+            'createdByAdminId': currentUserId,
+          },
+        );
+
+        // Sign out from the secondary auth instance
+        await secondaryAuth.signOut();
+
+        // Save to Firestore using the main app's Firestore instance
+        // Manually handle the role serialization to avoid freezed issues
+        final userJson = userModel.toJson();
+        userJson['role'] = userModel.role.toJson(); // Ensure proper role serialization
+        await _firestore.collection('users').doc(user.uid).set(userJson);
+
+        // Verify the user was created in Firestore
+        final createdDoc = await _firestore.collection('users').doc(user.uid).get();
+
+        if (!createdDoc.exists) {
+          throw Exception('Falha ao salvar usuário no Firestore');
+        }
+
+        return userModel;
+      } finally {
+        // Clean up the temporary Firebase app
+        await secondaryApp.delete();
+      }
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'email-already-in-use':
@@ -181,7 +238,7 @@ class AdminUserService {
   Future<UserModel?> getUserById(String userId) async {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
-      
+
       if (!doc.exists) {
         return null;
       }
@@ -234,6 +291,134 @@ class AdminUserService {
       return counts;
     } catch (e) {
       throw Exception('Erro ao contar usuários: $e');
+    }
+  }
+
+  /// Disable a user (soft deletion) in Firestore only
+  Future<void> disableUser(String userId) async {
+    try {
+      // Store current admin user credentials
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Admin user must be authenticated to disable users');
+      }
+
+      _log('Starting user disabling for userId: $userId');
+      _log('Current admin user: ${currentUser.uid}');
+
+      // Get user data before disabling for logging and validation
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        throw Exception('Usuário não encontrado');
+      }
+
+      final userData = userDoc.data()!;
+      final userEmail = userData['email'] as String?;
+      
+      _log('User data to disable: $userEmail - ${userData['role']}');
+
+      // Check if user is trying to disable themselves
+      if (userId == currentUser.uid) {
+        throw Exception('Você não pode desativar sua própria conta');
+      }
+
+      // Check if target user is initial admin
+      if (userData['metadata']?['isInitialAdmin'] == true) {
+        throw Exception('Não é possível desativar o administrador inicial');
+      }
+
+      if (userEmail == null) {
+        throw Exception('Email do usuário não encontrado');
+      }
+
+      // Check if user is already disabled
+      final isCurrentlyActive = userData['isActive'] ?? true; // Default to active if not set
+      if (!isCurrentlyActive) {
+        throw Exception('Usuário já está desativado');
+      }
+
+      _log('Attempting to update Firestore document (soft delete)...');
+      
+      // Soft delete: Update the user document to mark as inactive
+      await _firestore.collection('users').doc(userId).update({
+        'isActive': false,
+        'disabledAt': FieldValue.serverTimestamp(),
+        'disabledBy': currentUser.uid,
+        'lastSignInAt': FieldValue.serverTimestamp(),
+      });
+      
+      _log('Firestore document updated successfully (user disabled)');
+      _log('User disabling completed successfully');
+
+    } on FirebaseException catch (e) {
+      _log('Firebase error during disabling: ${e.code} - ${e.message}');
+      switch (e.code) {
+        case 'permission-denied':
+          throw Exception('Permissão negada para desativar este usuário');
+        case 'not-found':
+          throw Exception('Usuário não encontrado');
+        default:
+          throw Exception('Erro do Firebase: ${e.message}');
+      }
+    } catch (e) {
+      _log('General error during disabling: $e');
+      throw Exception('Erro ao desativar usuário: $e');
+    }
+  }
+
+  /// Enable a previously disabled user in Firestore only
+  Future<void> enableUser(String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Admin user must be authenticated to enable users');
+      }
+
+      _log('Starting user enabling for userId: $userId');
+
+      // Get user data before enabling for validation
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        throw Exception('Usuário não encontrado');
+      }
+
+      final userData = userDoc.data()!;
+      final userEmail = userData['email'] as String?;
+      
+      _log('User data to enable: $userEmail - ${userData['role']}');
+
+      // Check if user is already active
+      final isCurrentlyActive = userData['isActive'] ?? true; // Default to active if not set
+      if (isCurrentlyActive) {
+        throw Exception('Usuário já está ativo');
+      }
+
+      _log('Attempting to update Firestore document (enable user)...');
+      
+      // Enable: Update the user document to mark as active
+      await _firestore.collection('users').doc(userId).update({
+        'isActive': true,
+        'enabledAt': FieldValue.serverTimestamp(),
+        'enabledBy': currentUser.uid,
+        'lastSignInAt': FieldValue.serverTimestamp(),
+      });
+      
+      _log('Firestore document updated successfully (user enabled)');
+      _log('User enabling completed successfully');
+
+    } on FirebaseException catch (e) {
+      _log('Firebase error during enabling: ${e.code} - ${e.message}');
+      switch (e.code) {
+        case 'permission-denied':
+          throw Exception('Permissão negada para ativar este usuário');
+        case 'not-found':
+          throw Exception('Usuário não encontrado');
+        default:
+          throw Exception('Erro do Firebase: ${e.message}');
+      }
+    } catch (e) {
+      _log('General error during enabling: $e');
+      throw Exception('Erro ao ativar usuário: $e');
     }
   }
 }

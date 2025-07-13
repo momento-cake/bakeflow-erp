@@ -231,3 +231,237 @@ Important:
 - Review best practices for navigation on go router and make sure that animation transitions are
 - You don't need to remove the previous screen when navigating into a new one, keep the stack flow.
 eg when opening the add user the users list shouldn't leave the screen stack
+
+--------------------------------------------------------------------------------
+
+07/09/25 - 21:14
+
+## Review Notes 9
+
+When adding users:
+
+1. When the user hits enter on the keyboard it should trigger the button press to create user
+2. Once user is created it must add to firestore and the screen should pop, taking the user back to
+the users list screen where it will reload the user list to potentially show the newly added user
+on the list.
+3. When user is created by admin the authenticated user should not reload the whole app showhing
+a different home, this should not happen.
+4. A success message popup should appear if the new user was sucessfully saved
+5. When a new user is added with the temporary password we should enforce password change on the fist
+login
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 10:06
+
+## Review Notes 10
+
+When adding users:
+
+1. When admins create accounts it can only have 2 roles, admin or viewer. The reason why is
+because when admin create accounts it is for overall system management, those other existing roles
+will be usefull once company admins manage their users who will have access only to company related
+features.
+2. When trying to add a user it is only being added to firebase auth and not to firestore also
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 10:07
+
+## Review Notes 11
+
+When adding users:
+
+1. When a new user is created the session is being resetted to the newly created user. The expected
+result after creating a new user is to pop out of the user creation screen and reload the users list.
+The current user session must be kept, the user is only creating new users and it should not replace
+the current session! This is probably happening by some flows from the firebase auth user creation
+methods
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 10:24
+
+## Review Notes 12
+
+When adding users:
+
+1. The icon on the Create User button is hidden because it has the same color as the button bg
+2. There in an exception when trying to save on firestore
+Erro ao criar usuário: Exception: Erro inesperado ao criar usuário: [cloud_firestore/invalid-argument] Function setDoc() called with invalid data. Unsupported field value: a custom $36ViewerImpl object (found in field role in document users/kzSHaapAxyZvFNTqOL8AamHp08L2)
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 10:24
+
+## Review Notes 13
+
+When adding users:
+
+1. When user is succesfully added no confirmation popup appears nor the user creation screen is popped
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 10:44
+
+## Review Notes 14
+
+When adding users:
+
+1. The confirmation popup is super uggly and doesn't follow the current app design patterns nor
+components. Fix it to follow the same design structure especially the background colors.
+2. The popup should auto close after 5 seconds and add user screen should be popped
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 11:05
+
+## Review Notes 15
+
+When adding users:
+
+1. The confirmation popup is using colors that aren't from the project color patterns, review and
+replace.
+2. When the popup auto closes it isn't also closing the add user screen, the auto close should behave
+the same as when manually closing it.
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+10/09/25 - 11:11
+
+## Review Notes 16
+
+When adding users:
+
+1. Use project colors for the confirmation popup progress bar and success icon.
+2. Use a background color that maker the information section within the success popup text more
+visible, right now because of the yellowy background color it is hard ro read
+
+Important:
+
+- Keep guidelines from CLAUDE.md and linked docs in memory to improve results
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 15:R
+
+## Review Notes 17
+
+Implement user deletion on the @admin_users_screen.dart, this action must delete
+ from firebase auth and also from firestore, there is no need to soft delete users.
+ When handling the firebase_auth you might need to create a new firebase app and once
+ it is deleted from the firebase auth you can close the firebase app and perform the
+ firestore action on the main one. This is done similarly on createUser from @admin_user_service.dart
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 16:52
+
+## Review Notes 18
+
+When trying to delete an user the error for permission on firestore is being thrown
+ you must review the security sules and push changes. You can also remove the disable
+ option from the menu as it will not be used.
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 18:28
+
+## Review Notes 19
+
+When trying to delete an user the error the loading indicator for the list spins indefinetely
+ and also when I reload the page and opens the list again the deleted user is still there. The user
+ wasn't deleted from firestore nor firebase auth.
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 18:53
+
+## Review Notes 20
+
+You aren't properly trying to delete an user from firebase auth, the authenticated user does have
+ proper permissions. In order to delete from firebase auth you can use the same approach as for
+ creation where a new firebase instance is spawned and then the deletion happens there. The logs
+ aren't appearing on the web browser debug console.
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 19:01
+
+## Review Notes 21
+
+Since it isn't possible to delete an account on firebase auth let's proceed with the soft deletion
+ instead of deleting from firestore we soft delete there and also disable on firebase auth. Note
+ that you will need to change the @admin_users_screen.dart to show a disabled status and filter.
+ Also you must prevent login if the account is disabled.
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 19:11
+
+## Review Notes 22
+
+The message just appeared when trying to disable an user, review all firestore security rules.
+AdminUserService: Firebase error during disabling: permission-denied - Missing or insufficient permissions
+
+As we can't even disable other users from within the flutter sdk only do the soft delete on the firestore
+layer. Yous must make sure no user can login if it was soft deleted.
+
+ --------------------------------------------------------------------------------
+
+11/07/25 - 19:22
+
+## Review Notes 23 (cleared)
+
+You are working on fixing some bugs for the users list feature. The bugs are:
+
+- When trying to delete an user an missing firestore permission error is being thrown. This is
+most probably happening due to invalid security rules that you need to review and fix using
+the firebase cli.
+
+Files you are working with:
+
+- @firestore.rules
+- @admin_users_screen.dart
+- @admin_user_service.dart
+- potentially other files related to those linked 
+
+--------------------------------------------------------------------------------
+
+11/07/25 - 19:36
+
+## Review Notes 24
+
+You are working on fixing some bugs for the users list feature. The bugs are:
+
+- After deleting an user the loading state spins indefinetely.
+- After reloading the page after having deleted one user the user is still displaying as active
+but if you try to disable again an error message will popup telling the user has been deleted already

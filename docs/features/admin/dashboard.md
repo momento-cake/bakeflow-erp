@@ -73,3 +73,12 @@ the main text adjustable.
 3. Remove the greeting message and sub message and those are not needed
 4. Summary horizontal scroll is respecting the side safe area when it should ignore it and the content
 to be visible until both left and right edges instead of on the safe area padding
+
+-------------------------------------------------------------------------------
+
+11/09/25 - 15:48
+
+## Review Notes 4
+
+1. On non mobile screens the title from the feature card is cropping on the height as you can see on
+ the attached image. The same doesn't happen on mobile.

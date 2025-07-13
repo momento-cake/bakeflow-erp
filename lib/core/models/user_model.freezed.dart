@@ -414,56 +414,74 @@ mixin _$UserRole {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
-    required TResult Function() viewer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
-    TResult? Function()? viewer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
-    TResult Function()? viewer,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -531,10 +549,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
-    required TResult Function() viewer,
   }) {
     return admin();
   }
@@ -543,10 +564,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
-    TResult? Function()? viewer,
   }) {
     return admin?.call();
   }
@@ -555,10 +579,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
-    TResult Function()? viewer,
     required TResult orElse(),
   }) {
     if (admin != null) {
@@ -571,10 +598,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
   }) {
     return admin(this);
   }
@@ -583,10 +613,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
   }) {
     return admin?.call(this);
   }
@@ -595,10 +628,13 @@ class _$AdminImpl extends _Admin {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
     required TResult orElse(),
   }) {
     if (admin != null) {
@@ -611,6 +647,574 @@ class _$AdminImpl extends _Admin {
 abstract class _Admin extends UserRole {
   const factory _Admin() = _$AdminImpl;
   const _Admin._() : super._();
+}
+
+/// @nodoc
+abstract class _$$ViewerImplCopyWith<$Res> {
+  factory _$$ViewerImplCopyWith(
+          _$ViewerImpl value, $Res Function(_$ViewerImpl) then) =
+      __$$ViewerImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$ViewerImplCopyWithImpl<$Res>
+    extends _$UserRoleCopyWithImpl<$Res, _$ViewerImpl>
+    implements _$$ViewerImplCopyWith<$Res> {
+  __$$ViewerImplCopyWithImpl(
+      _$ViewerImpl _value, $Res Function(_$ViewerImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UserRole
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$ViewerImpl extends _Viewer {
+  const _$ViewerImpl() : super._();
+
+  @override
+  String toString() {
+    return 'UserRole.viewer()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$ViewerImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
+    required TResult Function() owner,
+    required TResult Function() manager,
+    required TResult Function() employee,
+  }) {
+    return viewer();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
+    TResult? Function()? owner,
+    TResult? Function()? manager,
+    TResult? Function()? employee,
+  }) {
+    return viewer?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
+    TResult Function()? owner,
+    TResult Function()? manager,
+    TResult Function()? employee,
+    required TResult orElse(),
+  }) {
+    if (viewer != null) {
+      return viewer();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
+    required TResult Function(_Owner value) owner,
+    required TResult Function(_Manager value) manager,
+    required TResult Function(_Employee value) employee,
+  }) {
+    return viewer(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
+    TResult? Function(_Owner value)? owner,
+    TResult? Function(_Manager value)? manager,
+    TResult? Function(_Employee value)? employee,
+  }) {
+    return viewer?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
+    TResult Function(_Owner value)? owner,
+    TResult Function(_Manager value)? manager,
+    TResult Function(_Employee value)? employee,
+    required TResult orElse(),
+  }) {
+    if (viewer != null) {
+      return viewer(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Viewer extends UserRole {
+  const factory _Viewer() = _$ViewerImpl;
+  const _Viewer._() : super._();
+}
+
+/// @nodoc
+abstract class _$$CompanyAdminImplCopyWith<$Res> {
+  factory _$$CompanyAdminImplCopyWith(
+          _$CompanyAdminImpl value, $Res Function(_$CompanyAdminImpl) then) =
+      __$$CompanyAdminImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$CompanyAdminImplCopyWithImpl<$Res>
+    extends _$UserRoleCopyWithImpl<$Res, _$CompanyAdminImpl>
+    implements _$$CompanyAdminImplCopyWith<$Res> {
+  __$$CompanyAdminImplCopyWithImpl(
+      _$CompanyAdminImpl _value, $Res Function(_$CompanyAdminImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UserRole
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$CompanyAdminImpl extends _CompanyAdmin {
+  const _$CompanyAdminImpl() : super._();
+
+  @override
+  String toString() {
+    return 'UserRole.companyAdmin()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$CompanyAdminImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
+    required TResult Function() owner,
+    required TResult Function() manager,
+    required TResult Function() employee,
+  }) {
+    return companyAdmin();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
+    TResult? Function()? owner,
+    TResult? Function()? manager,
+    TResult? Function()? employee,
+  }) {
+    return companyAdmin?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
+    TResult Function()? owner,
+    TResult Function()? manager,
+    TResult Function()? employee,
+    required TResult orElse(),
+  }) {
+    if (companyAdmin != null) {
+      return companyAdmin();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
+    required TResult Function(_Owner value) owner,
+    required TResult Function(_Manager value) manager,
+    required TResult Function(_Employee value) employee,
+  }) {
+    return companyAdmin(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
+    TResult? Function(_Owner value)? owner,
+    TResult? Function(_Manager value)? manager,
+    TResult? Function(_Employee value)? employee,
+  }) {
+    return companyAdmin?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
+    TResult Function(_Owner value)? owner,
+    TResult Function(_Manager value)? manager,
+    TResult Function(_Employee value)? employee,
+    required TResult orElse(),
+  }) {
+    if (companyAdmin != null) {
+      return companyAdmin(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _CompanyAdmin extends UserRole {
+  const factory _CompanyAdmin() = _$CompanyAdminImpl;
+  const _CompanyAdmin._() : super._();
+}
+
+/// @nodoc
+abstract class _$$CompanyManagerImplCopyWith<$Res> {
+  factory _$$CompanyManagerImplCopyWith(_$CompanyManagerImpl value,
+          $Res Function(_$CompanyManagerImpl) then) =
+      __$$CompanyManagerImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$CompanyManagerImplCopyWithImpl<$Res>
+    extends _$UserRoleCopyWithImpl<$Res, _$CompanyManagerImpl>
+    implements _$$CompanyManagerImplCopyWith<$Res> {
+  __$$CompanyManagerImplCopyWithImpl(
+      _$CompanyManagerImpl _value, $Res Function(_$CompanyManagerImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UserRole
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$CompanyManagerImpl extends _CompanyManager {
+  const _$CompanyManagerImpl() : super._();
+
+  @override
+  String toString() {
+    return 'UserRole.companyManager()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$CompanyManagerImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
+    required TResult Function() owner,
+    required TResult Function() manager,
+    required TResult Function() employee,
+  }) {
+    return companyManager();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
+    TResult? Function()? owner,
+    TResult? Function()? manager,
+    TResult? Function()? employee,
+  }) {
+    return companyManager?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
+    TResult Function()? owner,
+    TResult Function()? manager,
+    TResult Function()? employee,
+    required TResult orElse(),
+  }) {
+    if (companyManager != null) {
+      return companyManager();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
+    required TResult Function(_Owner value) owner,
+    required TResult Function(_Manager value) manager,
+    required TResult Function(_Employee value) employee,
+  }) {
+    return companyManager(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
+    TResult? Function(_Owner value)? owner,
+    TResult? Function(_Manager value)? manager,
+    TResult? Function(_Employee value)? employee,
+  }) {
+    return companyManager?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
+    TResult Function(_Owner value)? owner,
+    TResult Function(_Manager value)? manager,
+    TResult Function(_Employee value)? employee,
+    required TResult orElse(),
+  }) {
+    if (companyManager != null) {
+      return companyManager(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _CompanyManager extends UserRole {
+  const factory _CompanyManager() = _$CompanyManagerImpl;
+  const _CompanyManager._() : super._();
+}
+
+/// @nodoc
+abstract class _$$CompanyEmployeeImplCopyWith<$Res> {
+  factory _$$CompanyEmployeeImplCopyWith(_$CompanyEmployeeImpl value,
+          $Res Function(_$CompanyEmployeeImpl) then) =
+      __$$CompanyEmployeeImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$CompanyEmployeeImplCopyWithImpl<$Res>
+    extends _$UserRoleCopyWithImpl<$Res, _$CompanyEmployeeImpl>
+    implements _$$CompanyEmployeeImplCopyWith<$Res> {
+  __$$CompanyEmployeeImplCopyWithImpl(
+      _$CompanyEmployeeImpl _value, $Res Function(_$CompanyEmployeeImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UserRole
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$CompanyEmployeeImpl extends _CompanyEmployee {
+  const _$CompanyEmployeeImpl() : super._();
+
+  @override
+  String toString() {
+    return 'UserRole.companyEmployee()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$CompanyEmployeeImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
+    required TResult Function() owner,
+    required TResult Function() manager,
+    required TResult Function() employee,
+  }) {
+    return companyEmployee();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
+    TResult? Function()? owner,
+    TResult? Function()? manager,
+    TResult? Function()? employee,
+  }) {
+    return companyEmployee?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
+    TResult Function()? owner,
+    TResult Function()? manager,
+    TResult Function()? employee,
+    required TResult orElse(),
+  }) {
+    if (companyEmployee != null) {
+      return companyEmployee();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
+    required TResult Function(_Owner value) owner,
+    required TResult Function(_Manager value) manager,
+    required TResult Function(_Employee value) employee,
+  }) {
+    return companyEmployee(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
+    TResult? Function(_Owner value)? owner,
+    TResult? Function(_Manager value)? manager,
+    TResult? Function(_Employee value)? employee,
+  }) {
+    return companyEmployee?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
+    TResult Function(_Owner value)? owner,
+    TResult Function(_Manager value)? manager,
+    TResult Function(_Employee value)? employee,
+    required TResult orElse(),
+  }) {
+    if (companyEmployee != null) {
+      return companyEmployee(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _CompanyEmployee extends UserRole {
+  const factory _CompanyEmployee() = _$CompanyEmployeeImpl;
+  const _CompanyEmployee._() : super._();
 }
 
 /// @nodoc
@@ -655,10 +1259,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
-    required TResult Function() viewer,
   }) {
     return owner();
   }
@@ -667,10 +1274,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
-    TResult? Function()? viewer,
   }) {
     return owner?.call();
   }
@@ -679,10 +1289,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
-    TResult Function()? viewer,
     required TResult orElse(),
   }) {
     if (owner != null) {
@@ -695,10 +1308,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
   }) {
     return owner(this);
   }
@@ -707,10 +1323,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
   }) {
     return owner?.call(this);
   }
@@ -719,10 +1338,13 @@ class _$OwnerImpl extends _Owner {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
     required TResult orElse(),
   }) {
     if (owner != null) {
@@ -779,10 +1401,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
-    required TResult Function() viewer,
   }) {
     return manager();
   }
@@ -791,10 +1416,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
-    TResult? Function()? viewer,
   }) {
     return manager?.call();
   }
@@ -803,10 +1431,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
-    TResult Function()? viewer,
     required TResult orElse(),
   }) {
     if (manager != null) {
@@ -819,10 +1450,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
   }) {
     return manager(this);
   }
@@ -831,10 +1465,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
   }) {
     return manager?.call(this);
   }
@@ -843,10 +1480,13 @@ class _$ManagerImpl extends _Manager {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
     required TResult orElse(),
   }) {
     if (manager != null) {
@@ -903,10 +1543,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() admin,
+    required TResult Function() viewer,
+    required TResult Function() companyAdmin,
+    required TResult Function() companyManager,
+    required TResult Function() companyEmployee,
     required TResult Function() owner,
     required TResult Function() manager,
     required TResult Function() employee,
-    required TResult Function() viewer,
   }) {
     return employee();
   }
@@ -915,10 +1558,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? admin,
+    TResult? Function()? viewer,
+    TResult? Function()? companyAdmin,
+    TResult? Function()? companyManager,
+    TResult? Function()? companyEmployee,
     TResult? Function()? owner,
     TResult? Function()? manager,
     TResult? Function()? employee,
-    TResult? Function()? viewer,
   }) {
     return employee?.call();
   }
@@ -927,10 +1573,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? admin,
+    TResult Function()? viewer,
+    TResult Function()? companyAdmin,
+    TResult Function()? companyManager,
+    TResult Function()? companyEmployee,
     TResult Function()? owner,
     TResult Function()? manager,
     TResult Function()? employee,
-    TResult Function()? viewer,
     required TResult orElse(),
   }) {
     if (employee != null) {
@@ -943,10 +1592,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Admin value) admin,
+    required TResult Function(_Viewer value) viewer,
+    required TResult Function(_CompanyAdmin value) companyAdmin,
+    required TResult Function(_CompanyManager value) companyManager,
+    required TResult Function(_CompanyEmployee value) companyEmployee,
     required TResult Function(_Owner value) owner,
     required TResult Function(_Manager value) manager,
     required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
   }) {
     return employee(this);
   }
@@ -955,10 +1607,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Admin value)? admin,
+    TResult? Function(_Viewer value)? viewer,
+    TResult? Function(_CompanyAdmin value)? companyAdmin,
+    TResult? Function(_CompanyManager value)? companyManager,
+    TResult? Function(_CompanyEmployee value)? companyEmployee,
     TResult? Function(_Owner value)? owner,
     TResult? Function(_Manager value)? manager,
     TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
   }) {
     return employee?.call(this);
   }
@@ -967,10 +1622,13 @@ class _$EmployeeImpl extends _Employee {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Admin value)? admin,
+    TResult Function(_Viewer value)? viewer,
+    TResult Function(_CompanyAdmin value)? companyAdmin,
+    TResult Function(_CompanyManager value)? companyManager,
+    TResult Function(_CompanyEmployee value)? companyEmployee,
     TResult Function(_Owner value)? owner,
     TResult Function(_Manager value)? manager,
     TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
     required TResult orElse(),
   }) {
     if (employee != null) {
@@ -983,128 +1641,4 @@ class _$EmployeeImpl extends _Employee {
 abstract class _Employee extends UserRole {
   const factory _Employee() = _$EmployeeImpl;
   const _Employee._() : super._();
-}
-
-/// @nodoc
-abstract class _$$ViewerImplCopyWith<$Res> {
-  factory _$$ViewerImplCopyWith(
-          _$ViewerImpl value, $Res Function(_$ViewerImpl) then) =
-      __$$ViewerImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$ViewerImplCopyWithImpl<$Res>
-    extends _$UserRoleCopyWithImpl<$Res, _$ViewerImpl>
-    implements _$$ViewerImplCopyWith<$Res> {
-  __$$ViewerImplCopyWithImpl(
-      _$ViewerImpl _value, $Res Function(_$ViewerImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of UserRole
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$ViewerImpl extends _Viewer {
-  const _$ViewerImpl() : super._();
-
-  @override
-  String toString() {
-    return 'UserRole.viewer()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$ViewerImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() admin,
-    required TResult Function() owner,
-    required TResult Function() manager,
-    required TResult Function() employee,
-    required TResult Function() viewer,
-  }) {
-    return viewer();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? admin,
-    TResult? Function()? owner,
-    TResult? Function()? manager,
-    TResult? Function()? employee,
-    TResult? Function()? viewer,
-  }) {
-    return viewer?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? admin,
-    TResult Function()? owner,
-    TResult Function()? manager,
-    TResult Function()? employee,
-    TResult Function()? viewer,
-    required TResult orElse(),
-  }) {
-    if (viewer != null) {
-      return viewer();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Admin value) admin,
-    required TResult Function(_Owner value) owner,
-    required TResult Function(_Manager value) manager,
-    required TResult Function(_Employee value) employee,
-    required TResult Function(_Viewer value) viewer,
-  }) {
-    return viewer(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Admin value)? admin,
-    TResult? Function(_Owner value)? owner,
-    TResult? Function(_Manager value)? manager,
-    TResult? Function(_Employee value)? employee,
-    TResult? Function(_Viewer value)? viewer,
-  }) {
-    return viewer?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Admin value)? admin,
-    TResult Function(_Owner value)? owner,
-    TResult Function(_Manager value)? manager,
-    TResult Function(_Employee value)? employee,
-    TResult Function(_Viewer value)? viewer,
-    required TResult orElse(),
-  }) {
-    if (viewer != null) {
-      return viewer(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Viewer extends UserRole {
-  const factory _Viewer() = _$ViewerImpl;
-  const _Viewer._() : super._();
 }

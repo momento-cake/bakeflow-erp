@@ -27,7 +27,20 @@ final firestoreUserProvider = FutureProvider.family<UserModel?, String>((ref, ui
   try {
     final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (doc.exists) {
-      return UserModel.fromJson(doc.data()!);
+      final userData = doc.data()!;
+      final userModel = UserModel.fromJson(userData);
+      
+      // Check if user account is disabled and sign them out if so
+      if (!userModel.isActive) {
+        final authService = ref.read(authServiceProvider);
+        await authService.signOut();
+        throw AuthException(
+          code: 'user-disabled',
+          message: 'Esta conta foi desativada. Entre em contato com o administrador.',
+        );
+      }
+      
+      return userModel;
     }
   } catch (e) {
     rethrow;
@@ -51,9 +64,39 @@ class AuthService {
         email: email,
         password: password,
       );
+      
+      // Check if user account is disabled in Firestore
+      if (credential.user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(credential.user!.uid)
+            .get();
+            
+        if (userDoc.exists) {
+          final userData = userDoc.data()!;
+          final isActive = userData['isActive'] as bool? ?? true;
+          
+          if (!isActive) {
+            // Sign out the user immediately
+            await _auth.signOut();
+            throw AuthException(
+              code: 'user-disabled',
+              message: 'Esta conta foi desativada. Entre em contato com o administrador.',
+            );
+          }
+        }
+      }
+      
       return credential;
     } on FirebaseAuthException catch (e) {
       throw AuthException._fromFirebaseAuthException(e);
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException(
+        code: 'unknown',
+        message: 'Erro inesperado durante o login: $e',
+      );
     }
   }
 
@@ -125,7 +168,7 @@ class AuthException implements Exception {
       case 'invalid-email':
         return 'E-mail inválido';
       case 'user-disabled':
-        return 'Usuário desabilitado';
+        return 'Esta conta foi desativada. Entre em contato com o administrador.';
       case 'too-many-requests':
         return 'Muitas tentativas. Tente novamente mais tarde';
       case 'operation-not-allowed':

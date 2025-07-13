@@ -1,5 +1,4 @@
 # FVM
-.fvm/flutter_sdk
 
 # Environment variables
 .env
@@ -13,3 +12,6 @@ build/
 .dart_tool/
 .dart_tool/*
 .flutter-plugins-dependencies
+
+# FVM Version Cache
+.fvm/

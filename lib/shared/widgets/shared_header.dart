@@ -32,7 +32,7 @@ class SharedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth > 1200;
     final isTablet = screenWidth > 600;
     final isMobile = screenWidth <= 600;
@@ -200,7 +200,7 @@ class SharedHeader extends StatelessWidget {
   }
 
   Widget _buildUserActions(BuildContext context, bool isDesktop, bool isTablet) {
-    final isMobile = MediaQuery.of(context).size.width <= 600;
+    final isMobile = MediaQuery.sizeOf(context).width <= 600;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -81,14 +81,18 @@ class AuthViewModel extends StateNotifier<AuthState> {
         final business = Business(
           id: _businessService.generateBusinessId(),
           name: businessName,
-          cnpj: cnpj ?? '',
-          address: address,
-          phone: phone,
+          cnpj: cnpj,
+          address: address ?? '',
+          city: '', // TODO: Add city field to registration form
+          state: '', // TODO: Add state field to registration form
+          zipCode: '', // TODO: Add zipCode field to registration form
+          phone: phone ?? '',
           email: email,
-          ownerId: userCredential.user!.uid,
+          type: cnpj != null ? const BusinessType.formalCompany() : const BusinessType.soloEntrepreneur(),
+          status: const BusinessStatus.active(),
           authorizedUsers: [userCredential.user!.uid],
           createdAt: DateTime.now(),
-          isActive: true,
+          createdBy: userCredential.user!.uid,
           settings: const {},
         );
 

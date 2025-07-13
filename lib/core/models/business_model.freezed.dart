@@ -22,14 +22,23 @@ Business _$BusinessFromJson(Map<String, dynamic> json) {
 mixin _$Business {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  String get cnpj => throw _privateConstructorUsedError;
-  String? get address => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
+  String? get cnpj =>
+      throw _privateConstructorUsedError; // Optional for solo entrepreneurs
+  String? get fantasyName =>
+      throw _privateConstructorUsedError; // Nome fantasia
+  String get address => throw _privateConstructorUsedError;
+  String get city => throw _privateConstructorUsedError;
+  String get state => throw _privateConstructorUsedError;
+  String get zipCode => throw _privateConstructorUsedError;
+  String get phone => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
-  String get ownerId => throw _privateConstructorUsedError;
+  BusinessType get type => throw _privateConstructorUsedError;
+  BusinessStatus get status => throw _privateConstructorUsedError;
   List<String> get authorizedUsers => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+  String get createdBy =>
+      throw _privateConstructorUsedError; // Admin user ID who created this business
   Map<String, dynamic> get settings => throw _privateConstructorUsedError;
 
   /// Serializes this Business to a JSON map.
@@ -50,15 +59,24 @@ abstract class $BusinessCopyWith<$Res> {
   $Res call(
       {String id,
       String name,
-      String cnpj,
-      String? address,
-      String? phone,
+      String? cnpj,
+      String? fantasyName,
+      String address,
+      String city,
+      String state,
+      String zipCode,
+      String phone,
       String? email,
-      String ownerId,
+      BusinessType type,
+      BusinessStatus status,
       List<String> authorizedUsers,
       DateTime createdAt,
-      bool isActive,
+      DateTime? updatedAt,
+      String createdBy,
       Map<String, dynamic> settings});
+
+  $BusinessTypeCopyWith<$Res> get type;
+  $BusinessStatusCopyWith<$Res> get status;
 }
 
 /// @nodoc
@@ -78,14 +96,20 @@ class _$BusinessCopyWithImpl<$Res, $Val extends Business>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? cnpj = null,
-    Object? address = freezed,
-    Object? phone = freezed,
+    Object? cnpj = freezed,
+    Object? fantasyName = freezed,
+    Object? address = null,
+    Object? city = null,
+    Object? state = null,
+    Object? zipCode = null,
+    Object? phone = null,
     Object? email = freezed,
-    Object? ownerId = null,
+    Object? type = null,
+    Object? status = null,
     Object? authorizedUsers = null,
     Object? createdAt = null,
-    Object? isActive = null,
+    Object? updatedAt = freezed,
+    Object? createdBy = null,
     Object? settings = null,
   }) {
     return _then(_value.copyWith(
@@ -97,26 +121,46 @@ class _$BusinessCopyWithImpl<$Res, $Val extends Business>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      cnpj: null == cnpj
+      cnpj: freezed == cnpj
           ? _value.cnpj
           : cnpj // ignore: cast_nullable_to_non_nullable
-              as String,
-      address: freezed == address
+              as String?,
+      fantasyName: freezed == fantasyName
+          ? _value.fantasyName
+          : fantasyName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
+              as String,
+      city: null == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String,
+      state: null == state
+          ? _value.state
+          : state // ignore: cast_nullable_to_non_nullable
+              as String,
+      zipCode: null == zipCode
+          ? _value.zipCode
+          : zipCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone: null == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String?,
-      ownerId: null == ownerId
-          ? _value.ownerId
-          : ownerId // ignore: cast_nullable_to_non_nullable
-              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as BusinessType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as BusinessStatus,
       authorizedUsers: null == authorizedUsers
           ? _value.authorizedUsers
           : authorizedUsers // ignore: cast_nullable_to_non_nullable
@@ -125,15 +169,39 @@ class _$BusinessCopyWithImpl<$Res, $Val extends Business>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      createdBy: null == createdBy
+          ? _value.createdBy
+          : createdBy // ignore: cast_nullable_to_non_nullable
+              as String,
       settings: null == settings
           ? _value.settings
           : settings // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>,
     ) as $Val);
+  }
+
+  /// Create a copy of Business
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $BusinessTypeCopyWith<$Res> get type {
+    return $BusinessTypeCopyWith<$Res>(_value.type, (value) {
+      return _then(_value.copyWith(type: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Business
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $BusinessStatusCopyWith<$Res> get status {
+    return $BusinessStatusCopyWith<$Res>(_value.status, (value) {
+      return _then(_value.copyWith(status: value) as $Val);
+    });
   }
 }
 
@@ -148,15 +216,26 @@ abstract class _$$BusinessImplCopyWith<$Res>
   $Res call(
       {String id,
       String name,
-      String cnpj,
-      String? address,
-      String? phone,
+      String? cnpj,
+      String? fantasyName,
+      String address,
+      String city,
+      String state,
+      String zipCode,
+      String phone,
       String? email,
-      String ownerId,
+      BusinessType type,
+      BusinessStatus status,
       List<String> authorizedUsers,
       DateTime createdAt,
-      bool isActive,
+      DateTime? updatedAt,
+      String createdBy,
       Map<String, dynamic> settings});
+
+  @override
+  $BusinessTypeCopyWith<$Res> get type;
+  @override
+  $BusinessStatusCopyWith<$Res> get status;
 }
 
 /// @nodoc
@@ -174,14 +253,20 @@ class __$$BusinessImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? cnpj = null,
-    Object? address = freezed,
-    Object? phone = freezed,
+    Object? cnpj = freezed,
+    Object? fantasyName = freezed,
+    Object? address = null,
+    Object? city = null,
+    Object? state = null,
+    Object? zipCode = null,
+    Object? phone = null,
     Object? email = freezed,
-    Object? ownerId = null,
+    Object? type = null,
+    Object? status = null,
     Object? authorizedUsers = null,
     Object? createdAt = null,
-    Object? isActive = null,
+    Object? updatedAt = freezed,
+    Object? createdBy = null,
     Object? settings = null,
   }) {
     return _then(_$BusinessImpl(
@@ -193,26 +278,46 @@ class __$$BusinessImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      cnpj: null == cnpj
+      cnpj: freezed == cnpj
           ? _value.cnpj
           : cnpj // ignore: cast_nullable_to_non_nullable
-              as String,
-      address: freezed == address
+              as String?,
+      fantasyName: freezed == fantasyName
+          ? _value.fantasyName
+          : fantasyName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
+              as String,
+      city: null == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String,
+      state: null == state
+          ? _value.state
+          : state // ignore: cast_nullable_to_non_nullable
+              as String,
+      zipCode: null == zipCode
+          ? _value.zipCode
+          : zipCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone: null == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String?,
-      ownerId: null == ownerId
-          ? _value.ownerId
-          : ownerId // ignore: cast_nullable_to_non_nullable
-              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as BusinessType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as BusinessStatus,
       authorizedUsers: null == authorizedUsers
           ? _value._authorizedUsers
           : authorizedUsers // ignore: cast_nullable_to_non_nullable
@@ -221,10 +326,14 @@ class __$$BusinessImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      createdBy: null == createdBy
+          ? _value.createdBy
+          : createdBy // ignore: cast_nullable_to_non_nullable
+              as String,
       settings: null == settings
           ? _value._settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -239,14 +348,20 @@ class _$BusinessImpl implements _Business {
   const _$BusinessImpl(
       {required this.id,
       required this.name,
-      required this.cnpj,
-      this.address,
-      this.phone,
+      this.cnpj,
+      this.fantasyName,
+      required this.address,
+      required this.city,
+      required this.state,
+      required this.zipCode,
+      required this.phone,
       this.email,
-      required this.ownerId,
+      this.type = const BusinessType.soloEntrepreneur(),
+      this.status = const BusinessStatus.active(),
       final List<String> authorizedUsers = const [],
       required this.createdAt,
-      this.isActive = true,
+      this.updatedAt,
+      required this.createdBy,
       final Map<String, dynamic> settings = const {}})
       : _authorizedUsers = authorizedUsers,
         _settings = settings;
@@ -259,15 +374,29 @@ class _$BusinessImpl implements _Business {
   @override
   final String name;
   @override
-  final String cnpj;
+  final String? cnpj;
+// Optional for solo entrepreneurs
   @override
-  final String? address;
+  final String? fantasyName;
+// Nome fantasia
   @override
-  final String? phone;
+  final String address;
+  @override
+  final String city;
+  @override
+  final String state;
+  @override
+  final String zipCode;
+  @override
+  final String phone;
   @override
   final String? email;
   @override
-  final String ownerId;
+  @JsonKey()
+  final BusinessType type;
+  @override
+  @JsonKey()
+  final BusinessStatus status;
   final List<String> _authorizedUsers;
   @override
   @JsonKey()
@@ -280,9 +409,12 @@ class _$BusinessImpl implements _Business {
   @override
   final DateTime createdAt;
   @override
-  @JsonKey()
-  final bool isActive;
+  final DateTime? updatedAt;
+  @override
+  final String createdBy;
+// Admin user ID who created this business
   final Map<String, dynamic> _settings;
+// Admin user ID who created this business
   @override
   @JsonKey()
   Map<String, dynamic> get settings {
@@ -293,7 +425,7 @@ class _$BusinessImpl implements _Business {
 
   @override
   String toString() {
-    return 'Business(id: $id, name: $name, cnpj: $cnpj, address: $address, phone: $phone, email: $email, ownerId: $ownerId, authorizedUsers: $authorizedUsers, createdAt: $createdAt, isActive: $isActive, settings: $settings)';
+    return 'Business(id: $id, name: $name, cnpj: $cnpj, fantasyName: $fantasyName, address: $address, city: $city, state: $state, zipCode: $zipCode, phone: $phone, email: $email, type: $type, status: $status, authorizedUsers: $authorizedUsers, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, settings: $settings)';
   }
 
   @override
@@ -304,16 +436,24 @@ class _$BusinessImpl implements _Business {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.cnpj, cnpj) || other.cnpj == cnpj) &&
+            (identical(other.fantasyName, fantasyName) ||
+                other.fantasyName == fantasyName) &&
             (identical(other.address, address) || other.address == address) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.state, state) || other.state == state) &&
+            (identical(other.zipCode, zipCode) || other.zipCode == zipCode) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.status, status) || other.status == status) &&
             const DeepCollectionEquality()
                 .equals(other._authorizedUsers, _authorizedUsers) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.createdBy, createdBy) ||
+                other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other._settings, _settings));
   }
 
@@ -324,13 +464,19 @@ class _$BusinessImpl implements _Business {
       id,
       name,
       cnpj,
+      fantasyName,
       address,
+      city,
+      state,
+      zipCode,
       phone,
       email,
-      ownerId,
+      type,
+      status,
       const DeepCollectionEquality().hash(_authorizedUsers),
       createdAt,
-      isActive,
+      updatedAt,
+      createdBy,
       const DeepCollectionEquality().hash(_settings));
 
   /// Create a copy of Business
@@ -353,14 +499,20 @@ abstract class _Business implements Business {
   const factory _Business(
       {required final String id,
       required final String name,
-      required final String cnpj,
-      final String? address,
-      final String? phone,
+      final String? cnpj,
+      final String? fantasyName,
+      required final String address,
+      required final String city,
+      required final String state,
+      required final String zipCode,
+      required final String phone,
       final String? email,
-      required final String ownerId,
+      final BusinessType type,
+      final BusinessStatus status,
       final List<String> authorizedUsers,
       required final DateTime createdAt,
-      final bool isActive,
+      final DateTime? updatedAt,
+      required final String createdBy,
       final Map<String, dynamic> settings}) = _$BusinessImpl;
 
   factory _Business.fromJson(Map<String, dynamic> json) =
@@ -371,21 +523,33 @@ abstract class _Business implements Business {
   @override
   String get name;
   @override
-  String get cnpj;
+  String? get cnpj; // Optional for solo entrepreneurs
   @override
-  String? get address;
+  String? get fantasyName; // Nome fantasia
   @override
-  String? get phone;
+  String get address;
+  @override
+  String get city;
+  @override
+  String get state;
+  @override
+  String get zipCode;
+  @override
+  String get phone;
   @override
   String? get email;
   @override
-  String get ownerId;
+  BusinessType get type;
+  @override
+  BusinessStatus get status;
   @override
   List<String> get authorizedUsers;
   @override
   DateTime get createdAt;
   @override
-  bool get isActive;
+  DateTime? get updatedAt;
+  @override
+  String get createdBy; // Admin user ID who created this business
   @override
   Map<String, dynamic> get settings;
 
@@ -395,6 +559,686 @@ abstract class _Business implements Business {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$BusinessImplCopyWith<_$BusinessImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$BusinessType {
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() formalCompany,
+    required TResult Function() soloEntrepreneur,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? formalCompany,
+    TResult? Function()? soloEntrepreneur,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? formalCompany,
+    TResult Function()? soloEntrepreneur,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_FormalCompany value) formalCompany,
+    required TResult Function(_SoloEntrepreneur value) soloEntrepreneur,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_FormalCompany value)? formalCompany,
+    TResult? Function(_SoloEntrepreneur value)? soloEntrepreneur,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_FormalCompany value)? formalCompany,
+    TResult Function(_SoloEntrepreneur value)? soloEntrepreneur,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BusinessTypeCopyWith<$Res> {
+  factory $BusinessTypeCopyWith(
+          BusinessType value, $Res Function(BusinessType) then) =
+      _$BusinessTypeCopyWithImpl<$Res, BusinessType>;
+}
+
+/// @nodoc
+class _$BusinessTypeCopyWithImpl<$Res, $Val extends BusinessType>
+    implements $BusinessTypeCopyWith<$Res> {
+  _$BusinessTypeCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BusinessType
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$FormalCompanyImplCopyWith<$Res> {
+  factory _$$FormalCompanyImplCopyWith(
+          _$FormalCompanyImpl value, $Res Function(_$FormalCompanyImpl) then) =
+      __$$FormalCompanyImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$FormalCompanyImplCopyWithImpl<$Res>
+    extends _$BusinessTypeCopyWithImpl<$Res, _$FormalCompanyImpl>
+    implements _$$FormalCompanyImplCopyWith<$Res> {
+  __$$FormalCompanyImplCopyWithImpl(
+      _$FormalCompanyImpl _value, $Res Function(_$FormalCompanyImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusinessType
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$FormalCompanyImpl extends _FormalCompany {
+  const _$FormalCompanyImpl() : super._();
+
+  @override
+  String toString() {
+    return 'BusinessType.formalCompany()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$FormalCompanyImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() formalCompany,
+    required TResult Function() soloEntrepreneur,
+  }) {
+    return formalCompany();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? formalCompany,
+    TResult? Function()? soloEntrepreneur,
+  }) {
+    return formalCompany?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? formalCompany,
+    TResult Function()? soloEntrepreneur,
+    required TResult orElse(),
+  }) {
+    if (formalCompany != null) {
+      return formalCompany();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_FormalCompany value) formalCompany,
+    required TResult Function(_SoloEntrepreneur value) soloEntrepreneur,
+  }) {
+    return formalCompany(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_FormalCompany value)? formalCompany,
+    TResult? Function(_SoloEntrepreneur value)? soloEntrepreneur,
+  }) {
+    return formalCompany?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_FormalCompany value)? formalCompany,
+    TResult Function(_SoloEntrepreneur value)? soloEntrepreneur,
+    required TResult orElse(),
+  }) {
+    if (formalCompany != null) {
+      return formalCompany(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _FormalCompany extends BusinessType {
+  const factory _FormalCompany() = _$FormalCompanyImpl;
+  const _FormalCompany._() : super._();
+}
+
+/// @nodoc
+abstract class _$$SoloEntrepreneurImplCopyWith<$Res> {
+  factory _$$SoloEntrepreneurImplCopyWith(_$SoloEntrepreneurImpl value,
+          $Res Function(_$SoloEntrepreneurImpl) then) =
+      __$$SoloEntrepreneurImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$SoloEntrepreneurImplCopyWithImpl<$Res>
+    extends _$BusinessTypeCopyWithImpl<$Res, _$SoloEntrepreneurImpl>
+    implements _$$SoloEntrepreneurImplCopyWith<$Res> {
+  __$$SoloEntrepreneurImplCopyWithImpl(_$SoloEntrepreneurImpl _value,
+      $Res Function(_$SoloEntrepreneurImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusinessType
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$SoloEntrepreneurImpl extends _SoloEntrepreneur {
+  const _$SoloEntrepreneurImpl() : super._();
+
+  @override
+  String toString() {
+    return 'BusinessType.soloEntrepreneur()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$SoloEntrepreneurImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() formalCompany,
+    required TResult Function() soloEntrepreneur,
+  }) {
+    return soloEntrepreneur();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? formalCompany,
+    TResult? Function()? soloEntrepreneur,
+  }) {
+    return soloEntrepreneur?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? formalCompany,
+    TResult Function()? soloEntrepreneur,
+    required TResult orElse(),
+  }) {
+    if (soloEntrepreneur != null) {
+      return soloEntrepreneur();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_FormalCompany value) formalCompany,
+    required TResult Function(_SoloEntrepreneur value) soloEntrepreneur,
+  }) {
+    return soloEntrepreneur(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_FormalCompany value)? formalCompany,
+    TResult? Function(_SoloEntrepreneur value)? soloEntrepreneur,
+  }) {
+    return soloEntrepreneur?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_FormalCompany value)? formalCompany,
+    TResult Function(_SoloEntrepreneur value)? soloEntrepreneur,
+    required TResult orElse(),
+  }) {
+    if (soloEntrepreneur != null) {
+      return soloEntrepreneur(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SoloEntrepreneur extends BusinessType {
+  const factory _SoloEntrepreneur() = _$SoloEntrepreneurImpl;
+  const _SoloEntrepreneur._() : super._();
+}
+
+/// @nodoc
+mixin _$BusinessStatus {
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() active,
+    required TResult Function() inactive,
+    required TResult Function() suspended,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? active,
+    TResult? Function()? inactive,
+    TResult? Function()? suspended,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? active,
+    TResult Function()? inactive,
+    TResult Function()? suspended,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Active value) active,
+    required TResult Function(_Inactive value) inactive,
+    required TResult Function(_Suspended value) suspended,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Active value)? active,
+    TResult? Function(_Inactive value)? inactive,
+    TResult? Function(_Suspended value)? suspended,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Active value)? active,
+    TResult Function(_Inactive value)? inactive,
+    TResult Function(_Suspended value)? suspended,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BusinessStatusCopyWith<$Res> {
+  factory $BusinessStatusCopyWith(
+          BusinessStatus value, $Res Function(BusinessStatus) then) =
+      _$BusinessStatusCopyWithImpl<$Res, BusinessStatus>;
+}
+
+/// @nodoc
+class _$BusinessStatusCopyWithImpl<$Res, $Val extends BusinessStatus>
+    implements $BusinessStatusCopyWith<$Res> {
+  _$BusinessStatusCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BusinessStatus
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$ActiveImplCopyWith<$Res> {
+  factory _$$ActiveImplCopyWith(
+          _$ActiveImpl value, $Res Function(_$ActiveImpl) then) =
+      __$$ActiveImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$ActiveImplCopyWithImpl<$Res>
+    extends _$BusinessStatusCopyWithImpl<$Res, _$ActiveImpl>
+    implements _$$ActiveImplCopyWith<$Res> {
+  __$$ActiveImplCopyWithImpl(
+      _$ActiveImpl _value, $Res Function(_$ActiveImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusinessStatus
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$ActiveImpl extends _Active {
+  const _$ActiveImpl() : super._();
+
+  @override
+  String toString() {
+    return 'BusinessStatus.active()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$ActiveImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() active,
+    required TResult Function() inactive,
+    required TResult Function() suspended,
+  }) {
+    return active();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? active,
+    TResult? Function()? inactive,
+    TResult? Function()? suspended,
+  }) {
+    return active?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? active,
+    TResult Function()? inactive,
+    TResult Function()? suspended,
+    required TResult orElse(),
+  }) {
+    if (active != null) {
+      return active();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Active value) active,
+    required TResult Function(_Inactive value) inactive,
+    required TResult Function(_Suspended value) suspended,
+  }) {
+    return active(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Active value)? active,
+    TResult? Function(_Inactive value)? inactive,
+    TResult? Function(_Suspended value)? suspended,
+  }) {
+    return active?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Active value)? active,
+    TResult Function(_Inactive value)? inactive,
+    TResult Function(_Suspended value)? suspended,
+    required TResult orElse(),
+  }) {
+    if (active != null) {
+      return active(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Active extends BusinessStatus {
+  const factory _Active() = _$ActiveImpl;
+  const _Active._() : super._();
+}
+
+/// @nodoc
+abstract class _$$InactiveImplCopyWith<$Res> {
+  factory _$$InactiveImplCopyWith(
+          _$InactiveImpl value, $Res Function(_$InactiveImpl) then) =
+      __$$InactiveImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$InactiveImplCopyWithImpl<$Res>
+    extends _$BusinessStatusCopyWithImpl<$Res, _$InactiveImpl>
+    implements _$$InactiveImplCopyWith<$Res> {
+  __$$InactiveImplCopyWithImpl(
+      _$InactiveImpl _value, $Res Function(_$InactiveImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusinessStatus
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$InactiveImpl extends _Inactive {
+  const _$InactiveImpl() : super._();
+
+  @override
+  String toString() {
+    return 'BusinessStatus.inactive()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$InactiveImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() active,
+    required TResult Function() inactive,
+    required TResult Function() suspended,
+  }) {
+    return inactive();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? active,
+    TResult? Function()? inactive,
+    TResult? Function()? suspended,
+  }) {
+    return inactive?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? active,
+    TResult Function()? inactive,
+    TResult Function()? suspended,
+    required TResult orElse(),
+  }) {
+    if (inactive != null) {
+      return inactive();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Active value) active,
+    required TResult Function(_Inactive value) inactive,
+    required TResult Function(_Suspended value) suspended,
+  }) {
+    return inactive(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Active value)? active,
+    TResult? Function(_Inactive value)? inactive,
+    TResult? Function(_Suspended value)? suspended,
+  }) {
+    return inactive?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Active value)? active,
+    TResult Function(_Inactive value)? inactive,
+    TResult Function(_Suspended value)? suspended,
+    required TResult orElse(),
+  }) {
+    if (inactive != null) {
+      return inactive(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Inactive extends BusinessStatus {
+  const factory _Inactive() = _$InactiveImpl;
+  const _Inactive._() : super._();
+}
+
+/// @nodoc
+abstract class _$$SuspendedImplCopyWith<$Res> {
+  factory _$$SuspendedImplCopyWith(
+          _$SuspendedImpl value, $Res Function(_$SuspendedImpl) then) =
+      __$$SuspendedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$SuspendedImplCopyWithImpl<$Res>
+    extends _$BusinessStatusCopyWithImpl<$Res, _$SuspendedImpl>
+    implements _$$SuspendedImplCopyWith<$Res> {
+  __$$SuspendedImplCopyWithImpl(
+      _$SuspendedImpl _value, $Res Function(_$SuspendedImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusinessStatus
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$SuspendedImpl extends _Suspended {
+  const _$SuspendedImpl() : super._();
+
+  @override
+  String toString() {
+    return 'BusinessStatus.suspended()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$SuspendedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() active,
+    required TResult Function() inactive,
+    required TResult Function() suspended,
+  }) {
+    return suspended();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? active,
+    TResult? Function()? inactive,
+    TResult? Function()? suspended,
+  }) {
+    return suspended?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? active,
+    TResult Function()? inactive,
+    TResult Function()? suspended,
+    required TResult orElse(),
+  }) {
+    if (suspended != null) {
+      return suspended();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Active value) active,
+    required TResult Function(_Inactive value) inactive,
+    required TResult Function(_Suspended value) suspended,
+  }) {
+    return suspended(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Active value)? active,
+    TResult? Function(_Inactive value)? inactive,
+    TResult? Function(_Suspended value)? suspended,
+  }) {
+    return suspended?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Active value)? active,
+    TResult Function(_Inactive value)? inactive,
+    TResult Function(_Suspended value)? suspended,
+    required TResult orElse(),
+  }) {
+    if (suspended != null) {
+      return suspended(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Suspended extends BusinessStatus {
+  const factory _Suspended() = _$SuspendedImpl;
+  const _Suspended._() : super._();
 }
 
 BusinessSettings _$BusinessSettingsFromJson(Map<String, dynamic> json) {

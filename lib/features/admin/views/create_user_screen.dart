@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/themes/app_theme.dart';
 import '../../../core/models/user_model.dart';
-import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/shared_header.dart';
 import '../../auth/services/auth_service.dart';
@@ -24,8 +23,8 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
   final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
-  UserRole _selectedRole = const UserRole.employee();
+
+  UserRole _selectedRole = const UserRole.viewer();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -42,7 +41,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -50,7 +49,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
     }
 
     final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
-    
+
     return firestoreUser.when(
       data: (user) => _buildScreen(context, user ?? currentUser),
       loading: () => const Scaffold(
@@ -61,7 +60,6 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
   }
 
   Widget _buildScreen(BuildContext context, UserModel currentUser) {
-    // Check if user is admin
     if (!currentUser.role.isAdmin) {
       return _buildAccessDenied(context);
     }
@@ -72,8 +70,8 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
         children: [
           ScreenHeader(
             user: currentUser,
-            title: 'Adicionar Usuário',
-            subtitle: 'Crie um novo usuário no sistema',
+            title: 'Criar Usuário',
+            subtitle: 'Adicione um novo usuário ao sistema',
             onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
             onNotificationTap: () => _showComingSoon(context, 'Notificações'),
             showBackButton: true,
@@ -82,27 +80,24 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Form Card
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Form(
+                        key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Informações Básicas',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             const SizedBox(height: 20),
-                            
                             AppTextField(
                               controller: _displayNameController,
                               labelText: 'Nome Completo',
@@ -118,9 +113,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                                 return null;
                               },
                             ),
-                            
                             const SizedBox(height: 16),
-                            
                             AppTextField(
                               controller: _emailController,
                               labelText: 'Email',
@@ -129,17 +122,14 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                               keyboardType: TextInputType.emailAddress,
                               validator: AuthValidators.validateEmail,
                             ),
-                            
                             const SizedBox(height: 24),
-                            
                             Text(
                               'Perfil de Acesso',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             const SizedBox(height: 12),
-                            
                             DropdownButtonFormField<UserRole>(
                               value: _selectedRole,
                               decoration: InputDecoration(
@@ -148,27 +138,26 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                                 ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                                  borderSide: const BorderSide(color: AppTheme.neutralGray),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
                               ),
+                              isExpanded: true,
                               items: [
                                 DropdownMenuItem(
-                                  value: const UserRole.employee(),
-                                  child: _buildRoleItem(const UserRole.employee(), 'Pode registrar vendas e operações básicas'),
-                                ),
-                                DropdownMenuItem(
-                                  value: const UserRole.manager(),
-                                  child: _buildRoleItem(const UserRole.manager(), 'Pode gerenciar operações e visualizar relatórios'),
-                                ),
-                                DropdownMenuItem(
-                                  value: const UserRole.owner(),
-                                  child: _buildRoleItem(const UserRole.owner(), 'Acesso completo exceto administração do sistema'),
-                                ),
-                                DropdownMenuItem(
                                   value: const UserRole.viewer(),
-                                  child: _buildRoleItem(const UserRole.viewer(), 'Apenas visualização de relatórios'),
+                                  child: _buildRoleItem(const UserRole.viewer(),
+                                      'Apenas visualização de relatórios do sistema'),
                                 ),
                                 DropdownMenuItem(
                                   value: const UserRole.admin(),
-                                  child: _buildRoleItem(const UserRole.admin(), 'Controle total do sistema'),
+                                  child: _buildRoleItem(
+                                      const UserRole.admin(), 'Controle total do sistema'),
                                 ),
                               ],
                               onChanged: (value) {
@@ -179,17 +168,14 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                                 }
                               },
                             ),
-                            
                             const SizedBox(height: 24),
-                            
                             Text(
                               'Senha de Acesso',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             const SizedBox(height: 12),
-                            
                             AppTextField(
                               controller: _passwordController,
                               labelText: 'Senha',
@@ -197,7 +183,8 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                               prefixIcon: const Icon(Icons.lock_outline),
                               obscureText: _obscurePassword,
                               suffixIcon: IconButton(
-                                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                                icon: Icon(
+                                    _obscurePassword ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
                                   setState(() {
                                     _obscurePassword = !_obscurePassword;
@@ -206,17 +193,18 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                               ),
                               validator: AuthValidators.validatePassword,
                             ),
-                            
                             const SizedBox(height: 16),
-                            
                             AppTextField(
                               controller: _confirmPasswordController,
                               labelText: 'Confirmar Senha',
                               hintText: 'Digite a senha novamente',
                               prefixIcon: const Icon(Icons.lock_outline),
                               obscureText: _obscureConfirmPassword,
+                              onFieldSubmitted: (_) => _createUser(),
                               suffixIcon: IconButton(
-                                icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                                icon: Icon(_obscureConfirmPassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off),
                                 onPressed: () {
                                   setState(() {
                                     _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -228,7 +216,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                                   return 'Confirmação de senha é obrigatória';
                                 }
                                 if (value != _passwordController.text) {
-                                  return 'Senhas não coincidem';
+                                  return 'As senhas não coincidem';
                                 }
                                 return null;
                               },
@@ -237,32 +225,39 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                         ),
                       ),
                     ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: _isLoading ? null : () => context.pop(),
-                            child: const Text('Cancelar'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 2,
-                          child: AppButton(
-                            text: 'Criar Usuário',
-                            onPressed: _isLoading ? null : _createUser,
-                            isLoading: _isLoading,
-                            icon: Icons.person_add,
-                          ),
-                        ),
-                      ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _createUser,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Criar Usuário',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -285,6 +280,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
           style: TextStyle(
             fontSize: 12,
             color: AppTheme.neutralGray,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],
@@ -293,7 +289,6 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
 
   Widget _buildAccessDenied(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Acesso Negado'),
         backgroundColor: AppTheme.primaryColor,
@@ -336,20 +331,34 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
 
     try {
       await ref.read(adminUserServiceProvider).createUser(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        displayName: _displayNameController.text.trim(),
-        role: _selectedRole,
-      );
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            displayName: _displayNameController.text.trim(),
+            role: _selectedRole,
+          );
 
       if (mounted) {
+        // Store success message before navigation
+        final successMessage = 'Usuário "${_displayNameController.text.trim()}" criado com sucesso';
+
+        // Show success snackbar first
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Usuário ${_displayNameController.text.trim()} criado com sucesso'),
+            content: Text(successMessage),
             backgroundColor: AppTheme.successColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            duration: const Duration(seconds: 3),
           ),
         );
-        context.pop();
+
+        // Invalidate users list to refresh data
+        ref.invalidate(allUsersProvider);
+
+        // Navigate back to admin users screen using go_router
+        context.go('/admin/users');
       }
     } catch (error) {
       if (mounted) {
@@ -368,7 +377,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
       }
     }
   }
-  
+
   void _showComingSoon(BuildContext context, String feature) {
     showDialog(
       context: context,
@@ -377,7 +386,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
         content: Text('$feature estará disponível em breve.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
           ),
         ],

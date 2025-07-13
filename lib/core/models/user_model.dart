@@ -44,11 +44,19 @@ class UserModel with _$UserModel {
 class UserRole with _$UserRole {
   const UserRole._();
   
+  // Platform roles
   const factory UserRole.admin() = _Admin;
+  const factory UserRole.viewer() = _Viewer;
+  
+  // Company roles  
+  const factory UserRole.companyAdmin() = _CompanyAdmin;
+  const factory UserRole.companyManager() = _CompanyManager;
+  const factory UserRole.companyEmployee() = _CompanyEmployee;
+  
+  // Legacy roles (for backward compatibility)
   const factory UserRole.owner() = _Owner;
   const factory UserRole.manager() = _Manager;
   const factory UserRole.employee() = _Employee;
-  const factory UserRole.viewer() = _Viewer;
 
   factory UserRole.fromJson(Map<String, dynamic> json) {
     // Handle Firestore format where role is stored as {type: "admin"}
@@ -67,16 +75,26 @@ class UserRole with _$UserRole {
     switch (value.toLowerCase()) {
       case 'admin':
         return const UserRole.admin();
+      case 'viewer':
+        return const UserRole.viewer();
+      case 'companyadmin':
+      case 'company_admin':
+        return const UserRole.companyAdmin();
+      case 'companymanager':
+      case 'company_manager':
+        return const UserRole.companyManager();
+      case 'companyemployee':
+      case 'company_employee':
+        return const UserRole.companyEmployee();
+      // Legacy support
       case 'owner':
         return const UserRole.owner();
       case 'manager':
         return const UserRole.manager();
       case 'employee':
         return const UserRole.employee();
-      case 'viewer':
-        return const UserRole.viewer();
       default:
-        return const UserRole.employee();
+        return const UserRole.companyEmployee();
     }
   }
   
@@ -89,74 +107,146 @@ class UserRole with _$UserRole {
 extension UserRoleExtension on UserRole {
   String get name => when(
         admin: () => 'admin',
+        viewer: () => 'viewer',
+        companyAdmin: () => 'company_admin',
+        companyManager: () => 'company_manager',
+        companyEmployee: () => 'company_employee',
+        // Legacy support
         owner: () => 'owner',
         manager: () => 'manager',
         employee: () => 'employee',
-        viewer: () => 'viewer',
       );
 
   bool get isAdmin => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => false,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => false,
         manager: () => false,
         employee: () => false,
-        viewer: () => false,
+      );
+
+  bool get isPlatformRole => when(
+        admin: () => true,
+        viewer: () => true,
+        companyAdmin: () => false,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
       );
 
   bool get canManageUsers => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => false,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => false,
         manager: () => false,
         employee: () => false,
-        viewer: () => false,
+      );
+
+  bool get canViewCompanies => when(
+        admin: () => true,
+        viewer: () => true,
+        companyAdmin: () => false,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
+        owner: () => false,
+        manager: () => false,
+        employee: () => false,
       );
 
   bool get canManageCompanies => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => false,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => false,
         manager: () => false,
         employee: () => false,
-        viewer: () => false,
       );
 
   bool get canResetPasswords => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => true,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => false,
         manager: () => false,
         employee: () => false,
-        viewer: () => false,
       );
 
   bool get canCreateAccounts => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => true,
+        companyManager: () => false,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => false,
         manager: () => false,
         employee: () => false,
+      );
+
+  bool get canManageCompanyUsers => when(
+        admin: () => true, // ERP admin has unlimited access
         viewer: () => false,
+        companyAdmin: () => true, // Only Admin da Empresa can manage company users
+        companyManager: () => false, // Gerente MUST NOT have access to managing users
+        companyEmployee: () => false,
+        // Legacy support
+        owner: () => true,
+        manager: () => false,
+        employee: () => false,
       );
 
   String get displayName => when(
         admin: () => 'Administrador',
+        viewer: () => 'Visualizador',
+        companyAdmin: () => 'Admin da Empresa',
+        companyManager: () => 'Gerente',
+        companyEmployee: () => 'Funcionário',
+        // Legacy support
         owner: () => 'Proprietário',
         manager: () => 'Gerente',
         employee: () => 'Funcionário',
-        viewer: () => 'Visualizador',
       );
 
   bool get canManageProducts => when(
         admin: () => true,
+        viewer: () => false,
+        companyAdmin: () => true,
+        companyManager: () => true,
+        companyEmployee: () => true,
+        // Legacy support
         owner: () => true,
         manager: () => true,
         employee: () => true,
-        viewer: () => false,
       );
 
   bool get canViewReports => when(
         admin: () => true,
+        viewer: () => true,
+        companyAdmin: () => true,
+        companyManager: () => true,
+        companyEmployee: () => false,
+        // Legacy support
         owner: () => true,
         manager: () => true,
         employee: () => false,
-        viewer: () => true,
       );
 }
 

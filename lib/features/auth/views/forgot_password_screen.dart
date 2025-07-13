@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../app/themes/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
@@ -26,7 +27,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final formState = ref.watch(forgotPasswordFormViewModelProvider);
     final formNotifier = ref.watch(forgotPasswordFormViewModelProvider.notifier);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth >= 768;
 
     return Scaffold(
@@ -49,7 +50,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(height: isDesktop ? 60 : 40),
-                    
+
                     // Logo and title
                     Icon(
                       Icons.lock_reset,
@@ -60,22 +61,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     Text(
                       'Esqueci minha senha',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppTheme.spacingSmall),
-                    
+
                     if (!formState.emailSent) ...[
                       Text(
                         'Digite seu e-mail para receber as instruções de redefinição de senha',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.neutralGray,
-                        ),
+                              color: AppTheme.neutralGray,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: AppTheme.spacingXLarge),
-                      
+
                       AppTextField(
                         labelText: 'E-mail',
                         value: formState.email,
@@ -85,7 +86,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         errorText: formState.emailError,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
-                      
+
                       // Error message
                       if (formState.generalError != null)
                         Container(
@@ -107,7 +108,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         ),
                       if (formState.generalError != null)
                         const SizedBox(height: AppTheme.spacingMedium),
-                      
+
                       AppButton(
                         text: 'Enviar instruções',
                         onPressed: formState.isLoading ? null : _sendResetEmail,
@@ -135,32 +136,32 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             Text(
                               'E-mail enviado!',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: AppTheme.successColor,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                    color: AppTheme.successColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: AppTheme.spacingSmall),
                             Text(
                               'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.neutralGray,
-                              ),
+                                    color: AppTheme.neutralGray,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: AppTheme.spacingLarge),
-                      
+
                       AppButton(
                         text: 'Tentar novamente',
                         onPressed: formNotifier.reset,
                       ),
                     ],
-                    
+
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     // Back to login
                     TextButton(
                       onPressed: () => context.go('/login'),

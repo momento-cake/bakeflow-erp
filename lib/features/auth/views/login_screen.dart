@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../app/themes/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
@@ -20,7 +21,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final success = await ref.read(loginFormViewModelProvider.notifier).signIn();
-    
+
     if (success && mounted) {
       context.go('/dashboard');
     }
@@ -30,7 +31,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final formState = ref.watch(loginFormViewModelProvider);
     final formNotifier = ref.watch(loginFormViewModelProvider.notifier);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth >= 768;
 
     return Scaffold(
@@ -73,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppTheme.spacingXLarge * 2),
-                    
+
                     AppTextField(
                       labelText: 'E-mail',
                       value: formState.email,
@@ -83,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       errorText: formState.emailError,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppTextField(
                       labelText: 'Senha',
                       value: formState.password,
@@ -94,15 +95,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onFieldSubmitted: (_) => _signIn(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          formState.obscurePassword 
-                              ? Icons.visibility 
-                              : Icons.visibility_off,
+                          formState.obscurePassword ? Icons.visibility : Icons.visibility_off,
                         ),
                         onPressed: formNotifier.togglePasswordVisibility,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     // Remember me checkbox
                     Row(
                       children: [
@@ -139,14 +138,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     if (formState.generalError != null)
                       const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     AppButton(
                       text: 'Entrar',
                       onPressed: formState.isLoading ? null : _signIn,
                       isLoading: formState.isLoading,
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
-                    
+
                     TextButton(
                       onPressed: () => context.go('/forgot-password'),
                       child: const Text('Esqueci minha senha'),

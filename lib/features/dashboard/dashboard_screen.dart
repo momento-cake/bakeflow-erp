@@ -7,7 +7,9 @@ import '../../core/models/user_model.dart';
 import '../auth/services/auth_service.dart';
 
 class DashboardScreen extends ConsumerWidget {
-  const DashboardScreen({super.key});
+  final String? companyId;
+  
+  const DashboardScreen({super.key, this.companyId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,7 +33,7 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildDashboard(BuildContext context, WidgetRef ref, UserModel currentUser) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth > 1200;
 
     return Scaffold(
@@ -49,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: _getMaxCardWidth(screenWidth),
-                childAspectRatio: 1.1,
+                childAspectRatio: screenWidth <= 600 ? 1.2 : 1.0,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
@@ -75,9 +77,10 @@ class DashboardScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Container(
                 height: 120,
-                margin: const EdgeInsets.all(24),
+                margin: const EdgeInsets.only(top: 16, bottom: 24),
                 child: ListView(
                   scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   children: [
                     _buildStatCard(
                       context,
@@ -121,6 +124,9 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, WidgetRef ref, UserModel user, bool isDesktop) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth <= 600;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -157,26 +163,31 @@ class DashboardScreen extends ConsumerWidget {
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'BakeFlow ERP',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryColor,
-                            ),
-                      ),
-                      Text(
-                        'Gestão inteligente para confeitarias',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.neutralGray,
-                            ),
-                      ),
-                    ],
-                  ),
+                  // Show brand name and subtitle only on tablet and desktop
+                  if (!isMobile) ...[
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'BakeFlow ERP',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                        ),
+                        // Show subtitle only on desktop
+                        if (isDesktop)
+                          Text(
+                            'Gestão inteligente para confeitarias',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.neutralGray,
+                                ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
 
@@ -198,12 +209,16 @@ class DashboardScreen extends ConsumerWidget {
                 onTap: () => _showProfileMenu(context, ref),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 8 : 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.backgroundColor,
                     borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       CircleAvatar(
                         radius: 16,
@@ -216,7 +231,8 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      if (isDesktop) ...[
+                      // Show user details only on desktop
+                      if (!isMobile) ...[
                         const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,113 +274,99 @@ class DashboardScreen extends ConsumerWidget {
   List<Widget> _buildFeatureCards(BuildContext context, UserModel currentUser) {
     final cards = <Widget>[];
 
-    // Admin-only features
-    if (currentUser.role.isAdmin) {
+    // Core business features
+    cards.addAll([
+      _buildFeatureCard(
+        context,
+        'Vendas',
+        'Pedidos e vendas',
+        Icons.point_of_sale,
+        AppTheme.primaryColor,
+        () => _showComingSoon(context, 'Vendas'),
+      ),
+      _buildFeatureCard(
+        context,
+        'Clientes',
+        'Gestão de clientes',
+        Icons.people_outline,
+        Colors.blue,
+        () => _showComingSoon(context, 'Clientes'),
+      ),
+      _buildFeatureCard(
+        context,
+        'Produtos',
+        'Catálogo e preços',
+        Icons.cake,
+        Colors.orange,
+        () => _showComingSoon(context, 'Produtos'),
+      ),
+    ]);
+
+    // Management features (Admin de empresa and Gerente de empresa only)
+    if (currentUser.role.canViewReports) {
       cards.addAll([
         _buildFeatureCard(
           context,
           'Usuários',
-          'Gerenciar usuários do sistema',
+          'Usuários da empresa',
           Icons.people,
-          AppTheme.primaryColor,
-          () => context.push('/admin/users'),
-        ),
-        _buildFeatureCard(
-          context,
-          'Empresas',
-          'Gerenciar empresas (Em breve)',
-          Icons.business,
-          Colors.blue,
-          () => _showComingSoon(context, 'Gerenciamento de Empresas'),
-        ),
-        _buildFeatureCard(
-          context,
-          'Configurações',
-          'Configurações do sistema (Em breve)',
-          Icons.settings,
-          Colors.grey,
-          () => _showComingSoon(context, 'Configurações do Sistema'),
-        ),
-      ]);
-    } else {
-      // Business user features
-      cards.addAll([
-        _buildFeatureCard(
-          context,
-          'Produtos',
-          'Catálogo e preços',
-          Icons.cake,
-          AppTheme.primaryColor,
-          () => _showComingSoon(context, 'Produtos'),
-        ),
-        _buildFeatureCard(
-          context,
-          'Receitas',
-          'Fichas técnicas',
-          Icons.receipt_long,
-          Colors.orange,
-          () => _showComingSoon(context, 'Receitas'),
-        ),
-        _buildFeatureCard(
-          context,
-          'Ingredientes',
-          'Estoque e custos',
-          Icons.inventory,
-          Colors.green,
-          () => _showComingSoon(context, 'Ingredientes'),
-        ),
-        _buildFeatureCard(
-          context,
-          'Pedidos',
-          'Vendas e entregas',
-          Icons.shopping_cart,
           Colors.purple,
-          () => _showComingSoon(context, 'Pedidos'),
-        ),
-      ]);
-
-      // Additional features for managers and owners
-      if (currentUser.role.canViewReports) {
-        cards.addAll([
-          _buildFeatureCard(
-            context,
-            'Relatórios',
-            'Análises e métricas',
-            Icons.analytics,
-            Colors.indigo,
-            () => _showComingSoon(context, 'Relatórios'),
-          ),
-          _buildFeatureCard(
-            context,
-            'Financeiro',
-            'Receitas e despesas',
-            Icons.attach_money,
-            Colors.teal,
-            () => _showComingSoon(context, 'Financeiro'),
-          ),
-        ]);
-      }
-
-      // Features for all business users
-      cards.addAll([
-        _buildFeatureCard(
-          context,
-          'Fornecedores',
-          'Contatos e compras',
-          Icons.local_shipping,
-          Colors.brown,
-          () => _showComingSoon(context, 'Fornecedores'),
+          () => _showComingSoon(context, 'Usuários da Empresa'),
         ),
         _buildFeatureCard(
           context,
           'Configurações',
-          'Preferências',
+          'Configurações da empresa',
           Icons.settings,
           Colors.grey,
-          () => _showComingSoon(context, 'Configurações'),
+          () => _showComingSoon(context, 'Configurações da Empresa'),
+        ),
+        _buildFeatureCard(
+          context,
+          'Relatórios',
+          'Análises e métricas',
+          Icons.analytics,
+          Colors.indigo,
+          () => _showComingSoon(context, 'Relatórios'),
+        ),
+        _buildFeatureCard(
+          context,
+          'Financeiro',
+          'Receitas e despesas',
+          Icons.attach_money,
+          Colors.teal,
+          () => _showComingSoon(context, 'Financeiro'),
         ),
       ]);
     }
+
+    // Additional operational features
+    cards.addAll([
+      _buildFeatureCard(
+        context,
+        'Receitas',
+        'Fichas técnicas',
+        Icons.receipt_long,
+        Colors.green,
+        () => _showComingSoon(context, 'Receitas'),
+      ),
+      _buildFeatureCard(
+        context,
+        'Ingredientes',
+        'Estoque e custos',
+        Icons.inventory,
+        Colors.amber,
+        () => _showComingSoon(context, 'Ingredientes'),
+      ),
+      _buildFeatureCard(
+        context,
+        'Fornecedores',
+        'Contatos e compras',
+        Icons.local_shipping,
+        Colors.brown,
+        () => _showComingSoon(context, 'Fornecedores'),
+      ),
+    ]);
 
     return cards;
   }
@@ -377,6 +379,9 @@ class DashboardScreen extends ConsumerWidget {
     Color color,
     VoidCallback onTap,
   ) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth <= 600;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -393,13 +398,14 @@ class DashboardScreen extends ConsumerWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 64,
-                height: 64,
+                width: isMobile ? 48 : 64,
+                height: isMobile ? 48 : 64,
                 decoration: BoxDecoration(
                   color: color.withAlpha(26),
                   borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -407,7 +413,7 @@ class DashboardScreen extends ConsumerWidget {
                 child: Icon(
                   icon,
                   color: color,
-                  size: 32,
+                  size: isMobile ? 24 : 32,
                 ),
               ),
               const SizedBox(height: 16),
@@ -415,21 +421,26 @@ class DashboardScreen extends ConsumerWidget {
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: isMobile ? 16 : 18,
+                      height: 1.2,
                     ),
                 textAlign: TextAlign.center,
-                maxLines: 1,
+                maxLines: isMobile ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.neutralGray,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              // Only show subtitle on larger screens
+              if (!isMobile) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.neutralGray,
+                      ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ],
           ),
         ),

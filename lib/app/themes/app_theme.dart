@@ -5,7 +5,7 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF8B4513); // Saddle Brown
   static const Color secondaryColor = Color(0xFFFFF8DC); // Cornsilk
   static const Color accentColor = Color(0xFFFF6B6B); // Soft Red
-  static const Color successColor = Color(0xFF4ECDC4); // Turquoise
+  static const Color successColor = Color(0xFF4CAF50); // Green
   static const Color warningColor = Color(0xFFFFD93D); // Honey Yellow
   static const Color errorColor = Color(0xFFE74C3C); // Error Red
   static const Color neutralGray = Color(0xFF6C757D); // Neutral Gray
@@ -91,7 +91,7 @@ class AppTheme {
           ),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
