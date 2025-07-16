@@ -4,12 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/themes/app_theme.dart';
 import '../../core/models/user_model.dart';
+import '../admin/companies/presentation/providers/companies_providers.dart';
 import '../auth/services/auth_service.dart';
 
 class DashboardScreen extends ConsumerWidget {
-  final String? companyId;
-  
-  const DashboardScreen({super.key, this.companyId});
+  final String companyId;
+
+  const DashboardScreen({super.key, required this.companyId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +57,7 @@ class DashboardScreen extends ConsumerWidget {
                 mainAxisSpacing: 16,
               ),
               delegate: SliverChildListDelegate(
-                _buildFeatureCards(context, currentUser),
+                _buildFeatureCards(context, currentUser, ref),
               ),
             ),
           ),
@@ -271,7 +272,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildFeatureCards(BuildContext context, UserModel currentUser) {
+  List<Widget> _buildFeatureCards(BuildContext context, UserModel currentUser, WidgetRef ref) {
     final cards = <Widget>[];
 
     // Core business features
@@ -305,14 +306,16 @@ class DashboardScreen extends ConsumerWidget {
     // Management features (Admin de empresa and Gerente de empresa only)
     if (currentUser.role.canViewReports) {
       cards.addAll([
-        _buildFeatureCard(
-          context,
-          'Usuários',
-          'Usuários da empresa',
-          Icons.people,
-          Colors.purple,
-          () => _showComingSoon(context, 'Usuários da Empresa'),
-        ),
+        // Users management - only for company admins/managers with formal companies
+        if (_canManageUsers(currentUser, ref))
+          _buildFeatureCard(
+            context,
+            'Usuários',
+            'Usuários da empresa',
+            Icons.people,
+            Colors.purple,
+            () => context.go('/company/$companyId/users'),
+          ),
         _buildFeatureCard(
           context,
           'Configurações',
@@ -381,7 +384,7 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isMobile = screenWidth <= 600;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -582,6 +585,32 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  bool _canManageUsers(UserModel currentUser, WidgetRef ref) {
+    // Only company admins can manage users (based on existing extension)
+    if (!currentUser.role.canManageCompanyUsers) {
+      return false;
+    }
+
+    // Must have a business ID assigned for company users (ERP admins don't need this)
+    if (currentUser.businessId == null && !currentUser.role.isAdmin) {
+      return false;
+    }
+
+    // For ERP admins, always allow (they manage all users)
+    if (currentUser.role.isAdmin) {
+      return true;
+    }
+
+    // For company admins, check if the business allows multiple users
+    final businessAsync = ref.watch(businessProvider(currentUser.businessId!));
+
+    return businessAsync.when(
+      data: (business) => business?.type.allowsMultipleUsers ?? false,
+      loading: () => false,
+      error: (_, __) => false,
     );
   }
 }

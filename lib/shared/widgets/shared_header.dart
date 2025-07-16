@@ -68,7 +68,7 @@ class SharedHeader extends StatelessWidget {
                           context.pop();
                         } else {
                           // If can't pop, navigate to fallback route or dashboard
-                          context.go(fallbackRoute ?? '/dashboard');
+                          context.go(fallbackRoute ?? '/');
                         }
                       },
                     ),

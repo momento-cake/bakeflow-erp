@@ -58,11 +58,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => context.go('/dashboard'),
-                child: const Text('Voltar ao Dashboard'),
-              ),
             ],
           ),
         ),
@@ -375,7 +370,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   ) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isMobile = screenWidth <= 600;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),

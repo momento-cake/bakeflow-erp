@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import '../../../../../core/models/business_model.dart';
 import '../../../../../core/models/company_user_model.dart';
+import '../../../../../core/models/user_model.dart';
 
 class CompaniesService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,7 +16,7 @@ class CompaniesService {
   // Helper method to convert Firestore Timestamps to DateTime strings
   Map<String, dynamic> _convertTimestampsToStrings(Map<String, dynamic> data) {
     final converted = Map<String, dynamic>.from(data);
-    
+
     for (final entry in converted.entries.toList()) {
       if (entry.value is Timestamp) {
         converted[entry.key] = (entry.value as Timestamp).toDate().toIso8601String();
@@ -22,26 +24,24 @@ class CompaniesService {
         converted[entry.key] = _convertTimestampsToStrings(entry.value);
       }
     }
-    
+
     return converted;
   }
 
   // Companies CRUD operations
-  
+
   /// Get all businesses (platform admin only)
   Stream<List<Business>> getAllBusinesses() {
     return _businessesRef
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
+        .map((snapshot) => snapshot.docs.map((doc) {
               final data = _convertTimestampsToStrings(doc.data()! as Map<String, dynamic>);
               return Business.fromJson({
                 'id': doc.id,
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 
   /// Get business by ID
@@ -80,13 +80,13 @@ class CompaniesService {
 
       // Remove the empty id before sending to Firestore
       businessData.remove('id');
-      
+
       // Convert enums to strings for Firestore
       businessData['type'] = business.type.name;
       businessData['status'] = business.status.name;
 
       final docRef = await _businessesRef.add(businessData);
-      
+
       return business.copyWith(
         id: docRef.id,
         createdAt: DateTime.now(),
@@ -104,13 +104,13 @@ class CompaniesService {
       final updatedBusiness = business.copyWith(updatedAt: DateTime.now());
       final businessData = updatedBusiness.toJson();
       businessData.remove('id'); // Remove id from the data
-      
+
       // Convert enums to strings for Firestore
       businessData['type'] = business.type.name;
       businessData['status'] = business.status.name;
 
       await _businessesRef.doc(business.id).update(businessData);
-      
+
       return updatedBusiness;
     } catch (e) {
       throw Exception('Failed to update business: $e');
@@ -123,10 +123,7 @@ class CompaniesService {
       final batch = _firestore.batch();
 
       // Delete all company users in this business
-      final usersSnapshot = await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .get();
+      final usersSnapshot = await _businessesRef.doc(businessId).collection('users').get();
 
       for (final userDoc in usersSnapshot.docs) {
         batch.delete(userDoc.reference);
@@ -135,7 +132,7 @@ class CompaniesService {
       // Delete all other business data (products, recipes, etc.)
       final collections = [
         'products',
-        'recipes', 
+        'recipes',
         'ingredients',
         'suppliers',
         'purchases',
@@ -143,11 +140,8 @@ class CompaniesService {
       ];
 
       for (final collection in collections) {
-        final snapshot = await _businessesRef
-            .doc(businessId)
-            .collection(collection)
-            .get();
-        
+        final snapshot = await _businessesRef.doc(businessId).collection(collection).get();
+
         for (final doc in snapshot.docs) {
           batch.delete(doc.reference);
         }
@@ -171,9 +165,8 @@ class CompaniesService {
         .collection('users')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
-              final rawData = doc.data()! as Map<String, dynamic>;
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final rawData = doc.data();
               final data = _convertTimestampsToStrings(rawData);
               // Ensure isActive field exists with default value
               return CompanyUser.fromJson({
@@ -181,19 +174,14 @@ class CompaniesService {
                 'isActive': data['isActive'] ?? true, // Default to active if not set
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 
   /// Get company user by ID
   Future<CompanyUser?> getCompanyUserById(String businessId, String userId) async {
     try {
-      final doc = await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .doc(userId)
-          .get();
-      
+      final doc = await _businessesRef.doc(businessId).collection('users').doc(userId).get();
+
       if (doc.exists) {
         final rawData = doc.data() as Map<String, dynamic>;
         final data = _convertTimestampsToStrings(rawData);
@@ -277,6 +265,32 @@ class CompaniesService {
             .doc(firebaseUser.uid)
             .set(userData);
 
+        // IMPORTANT: Also create user in main users collection with businessId
+        // This is needed for proper authentication and permission checking
+        final mainUserModel = UserModel(
+          uid: firebaseUser.uid,
+          email: user.email,
+          displayName: user.name,
+          emailVerified: firebaseUser.emailVerified,
+          businessId: businessId, // Associate with business
+          role: user.role,
+          createdAt: DateTime.now(),
+          lastSignInAt: null,
+          isActive: true,
+          metadata: {
+            'requiresPasswordChange': true,
+            'createdByAdmin': true,
+            'createdByAdminEmail': currentUserEmail,
+            'createdByAdminId': currentUserId,
+          },
+        );
+
+        final mainUserData = mainUserModel.toJson();
+        mainUserData['role'] = mainUserModel.role.toJson(); // Ensure proper role serialization
+        mainUserData.remove('uid'); // Remove uid from the data (document ID is the uid)
+
+        await _firestore.collection('users').doc(firebaseUser.uid).set(mainUserData);
+
         // Add user to business authorized users list
         await _businessesRef.doc(businessId).update({
           'authorizedUsers': FieldValue.arrayUnion([firebaseUser.uid]),
@@ -310,11 +324,7 @@ class CompaniesService {
       final userData = updatedUser.toJson();
       userData.remove('id'); // Remove id from the data
 
-      await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .doc(user.id)
-          .update(userData);
+      await _businessesRef.doc(businessId).collection('users').doc(user.id).update(userData);
 
       // Update display name in Firebase Auth if name changed
       final firebaseUser = _auth.currentUser;
@@ -346,18 +356,14 @@ class CompaniesService {
       }
 
       // Get user data before soft deleting
-      final userDoc = await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .doc(userId)
-          .get();
-      
+      final userDoc = await _businessesRef.doc(businessId).collection('users').doc(userId).get();
+
       if (!userDoc.exists) {
         throw Exception('Usuário não encontrado');
       }
-      
+
       final userData = userDoc.data()!;
-      
+
       // Check if user is already inactive
       final isCurrentlyActive = userData['isActive'] as bool? ?? true;
       if (!isCurrentlyActive) {
@@ -365,11 +371,7 @@ class CompaniesService {
       }
 
       // Soft delete: Mark user as inactive instead of deleting
-      await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .doc(userId)
-          .update({
+      await _businessesRef.doc(businessId).collection('users').doc(userId).update({
         'isActive': false,
         'disabledAt': FieldValue.serverTimestamp(),
         'disabledBy': currentUser.uid,
@@ -390,12 +392,12 @@ class CompaniesService {
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       final updates = <String, dynamic>{
         'isActive': isActive,
         'updatedAt': FieldValue.serverTimestamp(),
       };
-      
+
       if (isActive) {
         // Re-enabling user
         updates['enabledAt'] = FieldValue.serverTimestamp();
@@ -405,12 +407,8 @@ class CompaniesService {
         updates['disabledAt'] = FieldValue.serverTimestamp();
         updates['disabledBy'] = currentUser.uid;
       }
-      
-      await _businessesRef
-          .doc(businessId)
-          .collection('users')
-          .doc(userId)
-          .update(updates);
+
+      await _businessesRef.doc(businessId).collection('users').doc(userId).update(updates);
     } catch (e) {
       throw Exception('Failed to toggle user status: $e');
     }
@@ -428,15 +426,13 @@ class CompaniesService {
         .where('name', isGreaterThanOrEqualTo: query)
         .where('name', isLessThanOrEqualTo: '$query\uf8ff')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
+        .map((snapshot) => snapshot.docs.map((doc) {
               final data = _convertTimestampsToStrings(doc.data()! as Map<String, dynamic>);
               return Business.fromJson({
                 'id': doc.id,
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 
   /// Get businesses by type
@@ -445,15 +441,13 @@ class CompaniesService {
         .where('type.type', isEqualTo: type.name)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
+        .map((snapshot) => snapshot.docs.map((doc) {
               final data = _convertTimestampsToStrings(doc.data()! as Map<String, dynamic>);
               return Business.fromJson({
                 'id': doc.id,
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 
   /// Get businesses by status
@@ -462,15 +456,13 @@ class CompaniesService {
         .where('status.type', isEqualTo: status.name)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
+        .map((snapshot) => snapshot.docs.map((doc) {
               final data = _convertTimestampsToStrings(doc.data()! as Map<String, dynamic>);
               return Business.fromJson({
                 'id': doc.id,
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 
   /// Search company users by name or email
@@ -485,16 +477,14 @@ class CompaniesService {
         .where('name', isGreaterThanOrEqualTo: query)
         .where('name', isLessThanOrEqualTo: '$query\uf8ff')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) {
-              final rawData = doc.data()! as Map<String, dynamic>;
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final rawData = doc.data();
               final data = _convertTimestampsToStrings(rawData);
               return CompanyUser.fromJson({
                 'id': doc.id,
                 'isActive': data['isActive'] ?? true, // Default to active if not set
                 ...data,
               });
-            })
-            .toList());
+            }).toList());
   }
 }

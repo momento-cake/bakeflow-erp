@@ -264,3 +264,185 @@ For detailed implementation roadmap with timelines and priorities, see **[Implem
 **Detailed Guidelines**: All development standards, code principles, security requirements, and workflow processes are documented in [Development Workflow](docs/development-workflow.md).
 
 **Backwards Compatibillity**: This is a new project so you don't need to worry about it at all
+
+## Permission System
+
+### Overview
+
+BakeFlow ERP implements a comprehensive role-based access control (RBAC) system through a centralized `PermissionService`. This service provides fine-grained control over feature access and user actions across the entire application.
+
+**Location**: `/lib/core/services/permission_service.dart`
+
+### Role Hierarchy
+
+#### Platform Roles (ERP-level)
+- **admin**: Full platform administrator with unrestricted access to all companies and features
+- **viewer**: Platform-wide read-only access across all companies
+
+#### Company Roles
+- **companyAdmin**: Full control within their assigned company (can manage users and settings)
+- **companyManager**: Operational management (cannot manage users or company settings)
+- **companyEmployee**: Basic operational access with limited reporting capabilities
+
+#### Legacy Roles (for backward compatibility)
+- **owner**, **manager**, **employee**: Mapped to equivalent company roles
+
+### Key Components
+
+#### 1. PermissionService
+The core service that handles all permission checks:
+
+```dart
+// Check feature access
+bool hasFeatureAccess(UserModel user, AppFeature feature)
+
+// Check specific action permission
+bool hasActionAccess(UserModel user, AppFeature feature, FeatureAction action)
+
+// Quick access methods
+bool canManageCompanyUsers(UserModel user)
+bool canViewAllCompanies(UserModel user)
+bool canManageCompanySettings(UserModel user)
+// ... and more
+```
+
+#### 2. AppFeature Enum
+Defines all controllable features:
+- `dashboard`, `products`, `recipes`, `ingredients`, `suppliers`
+- `purchases`, `inventory`, `orders`, `pricing`, `analytics`
+- `financialReports`, `companyUsers`, `companySettings`
+- `companyList`, `appSettings`
+
+#### 3. FeatureAction Enum
+Defines granular actions:
+- `view`: Read-only access
+- `create`: Create new items
+- `edit`: Modify existing items
+- `delete`: Remove items
+- `manage`: Combination of create, edit, and delete
+
+### Implementation Pattern
+
+#### Using Permission Service in Features
+
+```dart
+// Import the permission service
+import '../../../core/services/permission_service.dart';
+
+// In your widget
+@override
+Widget build(BuildContext context) {
+  final userPermissions = ref.watch(currentUserPermissionsProvider);
+  
+  if (userPermissions == null) {
+    return const CircularProgressIndicator();
+  }
+  
+  // Check permissions
+  if (!userPermissions.canManageCompanyUsers) {
+    return _buildAccessDeniedScreen();
+  }
+  
+  // User has permission, show the feature
+  return _buildFeatureScreen();
+}
+```
+
+#### Providers Available
+
+```dart
+// Get permission service instance
+final permissionService = ref.watch(permissionServiceProvider);
+
+// Get current user with permissions (async)
+final userPermissionsAsync = ref.watch(userPermissionsProvider);
+
+// Get current user permissions (sync, nullable)
+final userPermissions = ref.watch(currentUserPermissionsProvider);
+```
+
+### Critical Implementation Details
+
+#### User Document Structure
+For permissions to work correctly, users MUST exist in two places:
+
+1. **Company subcollection**: `businesses/{businessId}/users/{userId}`
+   - Contains company-specific user data
+   - Used for company user listing
+
+2. **Main users collection**: `users/{userId}` 
+   - Contains global user data including `businessId` field
+   - Required for authentication and permission checks
+   - **MUST include `businessId` for company users**
+
+#### Common Issues and Solutions
+
+**Issue**: "Nenhuma empresa associada" (No company associated)
+- **Cause**: User document missing `businessId` in main users collection
+- **Solution**: Ensure user creation creates documents in both locations
+
+**Issue**: User can't access features despite having correct role
+- **Cause**: Missing or incorrect role data in user document
+- **Solution**: Verify role is properly serialized using `role.toJson()`
+
+### Permission Matrix
+
+| Feature | Platform Admin | Platform Viewer | Company Admin | Company Manager | Company Employee |
+|---------|---------------|-----------------|---------------|-----------------|------------------|
+| Dashboard | ✅ All | ✅ View | ✅ All | ✅ All | ✅ All |
+| Products | ✅ All | ✅ View | ✅ All | ✅ All | ✅ All |
+| Recipes | ✅ All | ✅ View | ✅ All | ✅ All | ✅ All |
+| Financial Reports | ✅ All | ✅ View | ✅ All | ✅ All | ❌ |
+| Company Users | ✅ All | ✅ View | ✅ All | ❌ | ❌ |
+| Company Settings | ✅ All | ✅ View | ✅ All | ❌ | ❌ |
+| Platform Companies | ✅ All | ✅ View | ❌ | ❌ | ❌ |
+
+### Security Considerations
+
+1. **Frontend permissions are for UX only** - Always validate permissions on backend
+2. **Firestore rules must match** - Frontend and backend permissions should align
+3. **User context required** - Permissions require authenticated user with Firestore data
+4. **Business association** - Company users must have valid `businessId`
+
+### Testing Permissions
+
+```dart
+// Test different roles
+final testUser = UserModel(
+  uid: 'test123',
+  email: 'test@example.com',
+  role: UserRole.companyManager(),
+  businessId: 'business123',
+  // ... other fields
+);
+
+final service = PermissionService();
+
+// Test feature access
+expect(service.hasFeatureAccess(testUser, AppFeature.products), true);
+expect(service.hasFeatureAccess(testUser, AppFeature.companyUsers), false);
+
+// Test action access
+expect(
+  service.hasActionAccess(testUser, AppFeature.products, FeatureAction.manage), 
+  true
+);
+```
+
+### Extending the Permission System
+
+To add new features or permissions:
+
+1. Add feature to `AppFeature` enum
+2. Update `_getViewerPermissions()` if viewers should access it
+3. Update `_getCompanyRolePermissions()` for company role access
+4. Add specific action logic in `_hasCompanyActionAccess()` if needed
+5. Add convenience method in `PermissionService` and `UserPermissions`
+
+### Best Practices
+
+1. **Always use permission service** - Don't check roles directly
+2. **Handle loading states** - Permissions load asynchronously
+3. **Provide clear feedback** - Show why access is denied
+4. **Test thoroughly** - Verify each role behaves correctly
+5. **Keep permissions centralized** - All permission logic in one place

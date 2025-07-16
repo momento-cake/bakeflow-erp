@@ -32,7 +32,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final success = await ref.read(registerFormViewModelProvider.notifier).register();
 
     if (success && mounted) {
-      context.go('/dashboard');
+      context.go('/');
     }
   }
 

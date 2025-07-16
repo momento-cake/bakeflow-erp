@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/auth_state.dart';
 import '../utils/auth_validators.dart';
 import 'auth_view_model.dart';

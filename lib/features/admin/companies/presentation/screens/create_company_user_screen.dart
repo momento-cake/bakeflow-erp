@@ -92,7 +92,7 @@ class _CreateCompanyUserScreenState extends ConsumerState<CreateCompanyUserScree
                 onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
                 onNotificationTap: () => _showComingSoon(context, 'Notificações'),
                 showBackButton: true,
-                fallbackRoute: '/admin/companies/${widget.companyId}',
+                fallbackRoute: '/company/${widget.companyId}',
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -441,7 +441,7 @@ class _CreateCompanyUserScreenState extends ConsumerState<CreateCompanyUserScree
         ref.invalidate(companyUsersProvider(widget.companyId));
 
         // Navigate back to company details screen with users tab selected
-        context.go('/admin/companies/${widget.companyId}?tab=users');
+        context.go('/company/${widget.companyId}?tab=users');
       }
     } catch (e) {
       if (mounted) {
@@ -485,7 +485,7 @@ class _CreateCompanyUserScreenState extends ConsumerState<CreateCompanyUserScree
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/dashboard'),
+              onPressed: () => context.go('/'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/themes/app_theme.dart';
-import '../../../../../core/models/user_model.dart';
 import '../../../../../core/models/business_model.dart';
-import '../../../../../shared/widgets/shared_header.dart';
-import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../core/models/user_model.dart';
 import '../../../../../shared/utils/brazilian_validators.dart';
+import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../shared/widgets/shared_header.dart';
 import '../../../../auth/services/auth_service.dart';
 import '../providers/companies_providers.dart';
 
@@ -22,7 +21,7 @@ class CreateCompanyScreen extends ConsumerStatefulWidget {
 class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
+
   // Form controllers
   final _nameController = TextEditingController();
   final _cnpjController = TextEditingController();
@@ -32,7 +31,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
   final _zipCodeController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  
+
   BusinessType _businessType = const BusinessType.soloEntrepreneur();
   String? _selectedState;
   bool _isLoading = false;
@@ -54,7 +53,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -62,7 +61,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
     }
 
     final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
-    
+
     return firestoreUser.when(
       data: (user) => _buildScreen(context, user ?? currentUser),
       loading: () => const Scaffold(
@@ -115,9 +114,9 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
               Text(
                 'Informações da Empresa',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 24),
 
@@ -190,9 +189,9 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
               Text(
                 'Informações de Contato',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 16),
 
@@ -222,9 +221,9 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
               Text(
                 'Endereço',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 16),
 
@@ -357,9 +356,9 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
               Text(
                 '* Campos obrigatórios',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.neutralGray,
-                  fontStyle: FontStyle.italic,
-                ),
+                      color: AppTheme.neutralGray,
+                      fontStyle: FontStyle.italic,
+                    ),
               ),
             ],
           ),
@@ -387,8 +386,16 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
       final business = Business(
         id: '', // Will be set by Firestore
         name: _nameController.text.trim(),
-        cnpj: _businessType.requiresCnpj ? BrazilianFormatters.removeFormatting(_cnpjController.text) : null,
-        fantasyName: _fantasyNameController.text.trim().isNotEmpty ? _fantasyNameController.text.trim() : null,
+        cnpj: _businessType.requiresCnpj
+            ? BrazilianFormatters.removeFormatting(_cnpjController.text).isNotEmpty
+                ? BrazilianFormatters.removeFormatting(_cnpjController.text)
+                : null
+            : null,
+        fantasyName: _businessType.requiresCnpj
+            ? _fantasyNameController.text.trim().isNotEmpty
+                ? _fantasyNameController.text.trim()
+                : null
+            : null,
         address: _addressController.text.trim(),
         city: _cityController.text.trim(),
         state: _selectedState!,
@@ -403,7 +410,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
       );
 
       final result = await ref.read(companiesRepositoryProvider).createBusiness(business);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -411,7 +418,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
             backgroundColor: AppTheme.successColor,
           ),
         );
-        
+
         context.pop();
       }
     } catch (e) {
@@ -456,7 +463,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/dashboard'),
+              onPressed: () => context.go('/admin/dashboard'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],

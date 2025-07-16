@@ -23,7 +23,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final success = await ref.read(loginFormViewModelProvider.notifier).signIn();
 
     if (success && mounted) {
-      context.go('/dashboard');
+      context.go('/');
     }
   }
 

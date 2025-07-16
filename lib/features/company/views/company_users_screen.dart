@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,18 +7,20 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/themes/app_theme.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/services/permission_service.dart';
 import '../../../shared/widgets/shared_header.dart';
-import '../../auth/services/auth_service.dart';
-import '../services/admin_user_service.dart';
+import '../services/company_user_service.dart';
 
-class AdminUsersScreen extends ConsumerStatefulWidget {
-  const AdminUsersScreen({super.key});
+class CompanyUsersScreen extends ConsumerStatefulWidget {
+  final String companyId; // For ERP admins accessing specific company
+
+  const CompanyUsersScreen({super.key, required this.companyId});
 
   @override
-  ConsumerState<AdminUsersScreen> createState() => _AdminUsersScreenState();
+  ConsumerState<CompanyUsersScreen> createState() => _CompanyUsersScreenState();
 }
 
-class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
+class _CompanyUsersScreenState extends ConsumerState<CompanyUsersScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchTimer;
   String _searchQuery = '';
@@ -25,7 +28,14 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
   int _pageSize = 20;
   int _currentPage = 0;
 
-  final List<String> _filters = ['todos', 'administradores', 'usuarios', 'ativos', 'desativados'];
+  final List<String> _filters = [
+    'todos',
+    'administradores',
+    'gerentes',
+    'funcionarios',
+    'ativos',
+    'desativados'
+  ];
   final List<int> _pageSizes = [20, 50, 100];
 
   @override
@@ -58,34 +68,30 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = ref.watch(currentUserProvider);
+    final userPermissions = ref.watch(currentUserPermissionsProvider);
 
-    if (currentUser == null) {
+    if (userPermissions == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
+    // Check if user can manage company users using the permission service
+    if (!userPermissions.canManageCompanyUsers) {
+      return _buildAccessDenied(context, userPermissions.user);
+    }
 
-    return firestoreUser.when(
-      data: (user) => _buildScreen(context, user ?? currentUser),
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, _) => _buildScreen(context, currentUser),
-    );
+    return _buildScreen(context, userPermissions);
   }
 
-  Widget _buildScreen(BuildContext context, UserModel currentUser) {
-    // Check if user is admin
-    if (!currentUser.role.isAdmin) {
-      return _buildAccessDenied(context);
-    }
+  Widget _buildScreen(BuildContext context, UserPermissions userPermissions) {
+    final currentUser = userPermissions.user;
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isMobile = screenWidth <= 600;
-    final usersAsync = ref.watch(allUsersProvider);
+
+    // Use the current user's businessId, or allow admin to see this is a demo/error
+    final usersAsync = ref.watch(companyUsersStreamProvider(widget.companyId));
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -93,19 +99,19 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         children: [
           ScreenHeader(
             user: currentUser,
-            title: 'Gerenciar Usuários',
-            subtitle: 'Administre usuários do sistema',
+            title: 'Usuários da Empresa',
+            subtitle: 'Gerencie usuários da sua empresa',
             onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
             onNotificationTap: () => _showComingSoon(context, 'Notificações'),
             showBackButton: true,
-            fallbackRoute: '/admin/dashboard',
+            fallbackRoute: '/',
             actions: [
               // Add User Button - responsive design
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: isMobile
                     ? IconButton(
-                        onPressed: () => context.go('/admin/users/create'),
+                        onPressed: () => context.go('/company/${widget.companyId}/users/create'),
                         icon: const Icon(Icons.add, color: Colors.white),
                         style: IconButton.styleFrom(
                           backgroundColor: AppTheme.accentColor,
@@ -114,7 +120,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                         tooltip: 'Adicionar Usuário',
                       )
                     : ElevatedButton.icon(
-                        onPressed: () => context.go('/admin/users/create'),
+                        onPressed: () => context.go('/company/${widget.companyId}/users/create'),
                         icon: const Icon(Icons.add, color: Colors.white),
                         label: const Text(
                           'Adicionar Usuário',
@@ -131,7 +137,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
           ),
           Expanded(
             child: usersAsync.when(
-              data: (allUsers) => _buildUsersList(context, allUsers),
+              data: (allUsers) => _buildUsersList(context, allUsers, widget.companyId),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Column(
@@ -157,7 +163,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(allUsersProvider),
+                      onPressed: () => ref.invalidate(companyUsersStreamProvider(widget.companyId)),
                       child: const Text('Tentar Novamente'),
                     ),
                   ],
@@ -170,7 +176,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     );
   }
 
-  Widget _buildUsersList(BuildContext context, List<UserModel> allUsers) {
+  Widget _buildUsersList(BuildContext context, List<UserModel> allUsers, String businessId) {
     // Apply filters and search
     List<UserModel> filteredUsers = _applyFilters(allUsers);
 
@@ -193,10 +199,10 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         // Users List
         Expanded(
           child: paginatedUsers.isEmpty
-              ? _buildEmptyState(context)
+              ? _buildEmptyState(context, businessId)
               : RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(allUsersProvider);
+                    ref.invalidate(companyUsersStreamProvider);
                   },
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -221,10 +227,13 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     // Apply role filter
     switch (_selectedFilter) {
       case 'administradores':
-        filtered = filtered.where((user) => user.role.isAdmin).toList();
+        filtered = filtered.where((user) => user.role == const UserRole.companyAdmin()).toList();
         break;
-      case 'usuarios':
-        filtered = filtered.where((user) => !user.role.isAdmin).toList();
+      case 'gerentes':
+        filtered = filtered.where((user) => user.role == const UserRole.companyManager()).toList();
+        break;
+      case 'funcionarios':
+        filtered = filtered.where((user) => user.role == const UserRole.companyEmployee()).toList();
         break;
       case 'ativos':
         filtered = filtered.where((user) => user.isActive).toList();
@@ -377,8 +386,10 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         return 'Todos';
       case 'administradores':
         return 'Administradores';
-      case 'usuarios':
-        return 'Usuários';
+      case 'gerentes':
+        return 'Gerentes';
+      case 'funcionarios':
+        return 'Funcionários';
       case 'ativos':
         return 'Ativos';
       case 'desativados':
@@ -388,7 +399,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     }
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, String businessId) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -419,7 +430,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
           if (_searchQuery.isEmpty) ...[
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.go('/admin/users/create'),
+              onPressed: () => context.go('/company/${widget.companyId}/users/create'),
               icon: const Icon(Icons.add),
               label: const Text('Adicionar Usuário'),
             ),
@@ -522,15 +533,13 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                     ),
                   ),
                 ),
-                // Show admin icon for initial admin users
-                if (user.role.isAdmin && user.metadata['isInitialAdmin'] == true) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.verified_user,
-                    size: 16,
-                    color: AppTheme.warningColor,
-                  ),
-                ],
+                // Show company icon for company users
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.business,
+                  size: 16,
+                  color: AppTheme.primaryColor,
+                ),
               ],
             ),
           ],
@@ -554,24 +563,22 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
-            // Only show disable/enable option if not initial admin
-            if (user.metadata['isInitialAdmin'] != true)
-              PopupMenuItem(
-                value: user.isActive ? 'disable' : 'enable',
-                child: ListTile(
-                  leading: Icon(
-                    user.isActive ? Icons.block : Icons.check_circle,
+            PopupMenuItem(
+              value: user.isActive ? 'disable' : 'enable',
+              child: ListTile(
+                leading: Icon(
+                  user.isActive ? Icons.block : Icons.check_circle,
+                  color: user.isActive ? AppTheme.errorColor : Colors.green,
+                ),
+                title: Text(
+                  user.isActive ? 'Desativar' : 'Ativar',
+                  style: TextStyle(
                     color: user.isActive ? AppTheme.errorColor : Colors.green,
                   ),
-                  title: Text(
-                    user.isActive ? 'Desativar' : 'Ativar',
-                    style: TextStyle(
-                      color: user.isActive ? AppTheme.errorColor : Colors.green,
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
+                contentPadding: EdgeInsets.zero,
               ),
+            ),
           ],
         ),
         isThreeLine: true,
@@ -579,7 +586,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     );
   }
 
-  Widget _buildAccessDenied(BuildContext context) {
+  Widget _buildAccessDenied(BuildContext context, UserModel user) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Acesso Negado'),
@@ -597,13 +604,25 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Você não tem permissão para acessar esta área',
+              user.businessId == null
+                  ? 'Nenhuma empresa associada'
+                  : 'Você não tem permissão para gerenciar usuários',
               style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              user.businessId == null
+                  ? 'Seu usuário não está associado a nenhuma empresa. Entre em contato com o administrador.'
+                  : 'Apenas administradores da empresa podem gerenciar usuários.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.neutralGray,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/admin/dashboard'),
+              onPressed: () => context.go('/'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],
@@ -693,13 +712,17 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               );
 
               try {
+                developer.log('UI: Starting user disabling for ${user.uid}');
+
                 // Disable user with timeout
-                await ref.read(adminUserServiceProvider).disableUser(user.uid).timeout(
+                await ref.read(companyUserServiceProvider).disableCompanyUser(user.uid).timeout(
                   const Duration(seconds: 30),
                   onTimeout: () {
                     throw Exception('Operação expirou. Tente novamente.');
                   },
                 );
+
+                developer.log('UI: User disabling completed successfully');
 
                 // Close loading dialog safely
                 if (scaffoldContext.mounted) {
@@ -717,9 +740,10 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                   );
                 }
 
-                // Stream should auto-update, but invalidate for safety
-                ref.invalidate(allUsersProvider);
+                // Stream should auto-update
               } catch (e) {
+                developer.log('UI: Error during user disabling: $e');
+
                 // Close loading dialog safely
                 if (scaffoldContext.mounted) {
                   Navigator.of(scaffoldContext, rootNavigator: true).pop();
@@ -805,13 +829,17 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               );
 
               try {
+                developer.log('UI: Starting user enabling for ${user.uid}');
+
                 // Enable user with timeout
-                await ref.read(adminUserServiceProvider).enableUser(user.uid).timeout(
+                await ref.read(companyUserServiceProvider).enableCompanyUser(user.uid).timeout(
                   const Duration(seconds: 30),
                   onTimeout: () {
                     throw Exception('Operação expirou. Tente novamente.');
                   },
                 );
+
+                developer.log('UI: User enabling completed successfully');
 
                 // Close loading dialog safely
                 if (scaffoldContext.mounted) {
@@ -829,9 +857,10 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                   );
                 }
 
-                // Stream should auto-update, but invalidate for safety
-                ref.invalidate(allUsersProvider);
+                // Stream should auto-update
               } catch (e) {
+                developer.log('UI: Error during user enabling: $e');
+
                 // Close loading dialog safely
                 if (scaffoldContext.mounted) {
                   Navigator.of(scaffoldContext, rootNavigator: true).pop();

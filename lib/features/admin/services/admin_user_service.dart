@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'dart:html' as html;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,8 +21,6 @@ class AdminUserService {
 
   /// Helper method to log to browser console
   void _log(String message) {
-    // Log to browser console
-    html.window.console.log('AdminUserService: $message');
     // Also log to developer console
     developer.log(message, name: 'AdminUserService');
   }
@@ -46,16 +43,7 @@ class AdminUserService {
           };
           return UserModel.fromJson(userData);
         } catch (e) {
-          // If parsing fails, create a minimal user model
-          return UserModel(
-            uid: doc.id,
-            email: doc.data()['email'] ?? '',
-            displayName: doc.data()['displayName'],
-            emailVerified: doc.data()['emailVerified'] ?? false,
-            role: const UserRole.employee(),
-            createdAt: DateTime.now(),
-            isActive: doc.data()['isActive'] ?? true, // Default to active
-          );
+          rethrow;
         }
       }).toList();
     });
@@ -314,7 +302,7 @@ class AdminUserService {
 
       final userData = userDoc.data()!;
       final userEmail = userData['email'] as String?;
-      
+
       _log('User data to disable: $userEmail - ${userData['role']}');
 
       // Check if user is trying to disable themselves
@@ -338,7 +326,7 @@ class AdminUserService {
       }
 
       _log('Attempting to update Firestore document (soft delete)...');
-      
+
       // Soft delete: Update the user document to mark as inactive
       await _firestore.collection('users').doc(userId).update({
         'isActive': false,
@@ -346,10 +334,9 @@ class AdminUserService {
         'disabledBy': currentUser.uid,
         'lastSignInAt': FieldValue.serverTimestamp(),
       });
-      
+
       _log('Firestore document updated successfully (user disabled)');
       _log('User disabling completed successfully');
-
     } on FirebaseException catch (e) {
       _log('Firebase error during disabling: ${e.code} - ${e.message}');
       switch (e.code) {
@@ -384,7 +371,7 @@ class AdminUserService {
 
       final userData = userDoc.data()!;
       final userEmail = userData['email'] as String?;
-      
+
       _log('User data to enable: $userEmail - ${userData['role']}');
 
       // Check if user is already active
@@ -394,7 +381,7 @@ class AdminUserService {
       }
 
       _log('Attempting to update Firestore document (enable user)...');
-      
+
       // Enable: Update the user document to mark as active
       await _firestore.collection('users').doc(userId).update({
         'isActive': true,
@@ -402,10 +389,9 @@ class AdminUserService {
         'enabledBy': currentUser.uid,
         'lastSignInAt': FieldValue.serverTimestamp(),
       });
-      
+
       _log('Firestore document updated successfully (user enabled)');
       _log('User enabling completed successfully');
-
     } on FirebaseException catch (e) {
       _log('Firebase error during enabling: ${e.code} - ${e.message}');
       switch (e.code) {

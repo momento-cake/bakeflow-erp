@@ -1,21 +1,22 @@
+import 'package:bakeflow_erp/features/admin/companies/presentation/screens/company_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/services/auth_service.dart';
-import '../../features/auth/views/forgot_password_screen.dart';
-import '../../features/auth/views/login_screen.dart';
-import '../../features/dashboard/dashboard_screen.dart';
-import '../../features/dashboard/admin_dashboard_screen.dart';
+import '../../features/admin/companies/presentation/screens/companies_screen.dart';
+import '../../features/admin/companies/presentation/screens/company_user_details_screen.dart';
+import '../../features/admin/companies/presentation/screens/create_company_screen.dart';
+import '../../features/admin/services/initial_setup_service.dart';
 import '../../features/admin/views/admin_users_screen.dart';
 import '../../features/admin/views/create_user_screen.dart';
 import '../../features/admin/views/initial_setup_screen.dart';
-import '../../features/admin/services/initial_setup_service.dart';
-import '../../features/admin/companies/presentation/screens/companies_screen.dart';
-import '../../features/admin/companies/presentation/screens/create_company_screen.dart';
-import '../../features/admin/companies/presentation/screens/company_details_screen.dart';
-import '../../features/admin/companies/presentation/screens/create_company_user_screen.dart';
-import '../../features/admin/companies/presentation/screens/company_user_details_screen.dart';
+import '../../features/auth/services/auth_service.dart';
+import '../../features/auth/views/forgot_password_screen.dart';
+import '../../features/auth/views/login_screen.dart';
+import '../../features/company/views/company_users_screen.dart';
+import '../../features/company/views/create_company_user_screen.dart' as company;
+import '../../features/dashboard/admin_dashboard_screen.dart';
+import '../../features/dashboard/dashboard_screen.dart';
 
 // Custom page transition that slides from bottom for modal-like screens
 Page<T> _modalPageBuilder<T extends Object?>(
@@ -71,6 +72,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     error: (_, __) => basicUser,
   );
 
+  final companyId = currentUser?.businessId;
+
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
@@ -85,7 +88,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         error: (_, __) => false,
       );
 
-      // CRITICAL FIX: If an admin user is already logged in, 
+      // CRITICAL FIX: If an admin user is already logged in,
       // never redirect to setup regardless of the hasAdmins check result
       if (isLoggedIn) {
         // Check if logged in user is admin by examining their role
@@ -95,10 +98,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           companyAdmin: () => false,
           companyManager: () => false,
           companyEmployee: () => false,
-          // Legacy support
-          owner: () => false,
-          manager: () => false,
-          employee: () => false,
         );
 
         // If logged in as admin and on setup page, redirect to admin dashboard
@@ -108,17 +107,33 @@ final routerProvider = Provider<GoRouter>((ref) {
 
         // Normal logged-in user redirects based on role
         if (isAuthPage) {
-          return isAdminUser ? '/admin/dashboard' : '/dashboard';
+          return isAdminUser ? '/admin/dashboard' : '/';
         }
 
         // Redirect to appropriate dashboard if on root
         if (state.fullPath == '/') {
-          return isAdminUser ? '/admin/dashboard' : '/dashboard';
+          return isAdminUser ? '/admin/dashboard' : '/';
         }
 
         // Prevent non-admin users from accessing admin routes
         if (state.fullPath?.startsWith('/admin') == true && !isAdminUser) {
-          return '/dashboard';
+          return '/';
+        }
+
+        if (state.fullPath?.contains('/company/') == true) {
+          final companyId = state.pathParameters['id'];
+          if (companyId == null && isAdminUser) {
+            return '/admin/dashboard';
+          }
+
+          if (companyId != null && !isAdminUser) {
+            final userCompanyId = currentUser.businessId;
+
+            // Ensure user is accessing their own company
+            if (userCompanyId != companyId) {
+              return '/company/$userCompanyId';
+            }
+          }
         }
 
         return null; // Allow access to other pages when logged in
@@ -152,10 +167,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const DashboardScreen(),
-      ),
+      // ========================================
+      // AUTHENTICATION & SETUP ROUTES (Public)
+      // ========================================
       GoRoute(
         path: '/login',
         name: 'login',
@@ -167,22 +181,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
-        path: '/dashboard',
-        name: 'dashboard',
-        builder: (context, state) => const DashboardScreen(),
+        path: '/setup',
+        name: 'setup',
+        builder: (context, state) => const InitialSetupScreen(),
       ),
+
+      // ========================================
+      // DEFAULT ROUTES
+      // ========================================
+      GoRoute(
+        path: '/',
+        name: 'dashboard',
+        builder: (context, state) => DashboardScreen(companyId: companyId ?? ''),
+      ),
+
+      // ========================================
+      // ADMIN ROUTES (Admin-only)
+      // ========================================
       GoRoute(
         path: '/admin/dashboard',
         name: 'admin-dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
-      ),
-      GoRoute(
-        path: '/company/:id/dashboard',
-        name: 'company-dashboard',
-        builder: (context, state) {
-          final companyId = state.pathParameters['id']!;
-          return DashboardScreen(companyId: companyId);
-        },
       ),
       GoRoute(
         path: '/admin/users',
@@ -198,7 +217,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           const CreateUserScreen(),
         ),
       ),
-      // Companies routes
       GoRoute(
         path: '/admin/companies',
         name: 'admin-companies',
@@ -209,39 +227,54 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'admin-companies-create',
         builder: (context, state) => const CreateCompanyScreen(),
       ),
+
+      // ========================================
+      // COMPANY ROUTES (Permission-based)
+      // ========================================
       GoRoute(
-        path: '/admin/companies/:id',
-        name: 'admin-company-details',
+        path: '/company/:id',
+        name: 'company-dashboard',
         builder: (context, state) {
           final companyId = state.pathParameters['id']!;
-          final initialTab = state.uri.queryParameters['tab'];
-          return CompanyDetailsScreen(
-            companyId: companyId,
-            initialTab: initialTab,
+          return DashboardScreen(companyId: companyId);
+        },
+      ),
+      GoRoute(
+        path: '/company/:id/details',
+        name: 'company-details',
+        builder: (context, state) {
+          final companyId = state.pathParameters['id']!;
+          return CompanyDetailsScreen(companyId: companyId);
+        },
+      ),
+      GoRoute(
+        path: '/company/:id/users',
+        name: 'company-users',
+        builder: (context, state) {
+          final companyId = state.pathParameters['id']!;
+          return CompanyUsersScreen(companyId: companyId);
+        },
+      ),
+      GoRoute(
+        path: '/company/:id/users/create',
+        name: 'company-users-create',
+        pageBuilder: (context, state) {
+          final companyId = state.pathParameters['id']!;
+          return _modalPageBuilder(
+            context,
+            state,
+            company.CreateCompanyUserScreen(companyId: companyId),
           );
         },
       ),
       GoRoute(
-        path: '/admin/companies/:id/users/create',
-        name: 'admin-create-company-user',
-        builder: (context, state) {
-          final companyId = state.pathParameters['id']!;
-          return CreateCompanyUserScreen(companyId: companyId);
-        },
-      ),
-      GoRoute(
-        path: '/admin/companies/:id/users/:userId',
-        name: 'admin-company-user-details',
+        path: '/company/:id/users/:userId',
+        name: 'company-user-details',
         builder: (context, state) {
           final companyId = state.pathParameters['id']!;
           final userId = state.pathParameters['userId']!;
           return CompanyUserDetailsScreen(companyId: companyId, userId: userId);
         },
-      ),
-      GoRoute(
-        path: '/setup',
-        name: 'setup',
-        builder: (context, state) => const InitialSetupScreen(),
       ),
     ],
   );

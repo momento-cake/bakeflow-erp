@@ -15,7 +15,7 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       emailVerified: json['emailVerified'] as bool,
       businessId: json['businessId'] as String?,
       role: json['role'] == null
-          ? const UserRole.owner()
+          ? const UserRole.companyEmployee()
           : UserRole.fromJson(json['role'] as Map<String, dynamic>),
       createdAt: json['createdAt'] == null
           ? null

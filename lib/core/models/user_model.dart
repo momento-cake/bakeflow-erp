@@ -13,15 +13,14 @@ class UserModel with _$UserModel {
     String? photoURL,
     required bool emailVerified,
     String? businessId,
-    @Default(UserRole.owner()) UserRole role,
+    @Default(UserRole.companyEmployee()) UserRole role,
     DateTime? createdAt,
     DateTime? lastSignInAt,
     @Default(true) bool isActive,
     @Default({}) Map<String, dynamic> metadata,
   }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) =>
-      _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
   factory UserModel.fromFirebaseUser(User user) {
     return UserModel(
@@ -31,7 +30,7 @@ class UserModel with _$UserModel {
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
       businessId: null, // Set during business context setup
-      role: const UserRole.owner(), // Default role
+      role: const UserRole.companyEmployee(), // Default role
       createdAt: user.metadata.creationTime,
       lastSignInAt: user.metadata.lastSignInTime,
       isActive: true,
@@ -43,20 +42,15 @@ class UserModel with _$UserModel {
 @freezed
 class UserRole with _$UserRole {
   const UserRole._();
-  
+
   // Platform roles
   const factory UserRole.admin() = _Admin;
   const factory UserRole.viewer() = _Viewer;
-  
-  // Company roles  
+
+  // Company roles
   const factory UserRole.companyAdmin() = _CompanyAdmin;
   const factory UserRole.companyManager() = _CompanyManager;
   const factory UserRole.companyEmployee() = _CompanyEmployee;
-  
-  // Legacy roles (for backward compatibility)
-  const factory UserRole.owner() = _Owner;
-  const factory UserRole.manager() = _Manager;
-  const factory UserRole.employee() = _Employee;
 
   factory UserRole.fromJson(Map<String, dynamic> json) {
     // Handle Firestore format where role is stored as {type: "admin"}
@@ -68,7 +62,7 @@ class UserRole with _$UserRole {
       return UserRole.fromString(json['runtimeType'] as String);
     }
     // Default to employee if no valid format found
-    return const UserRole.employee();
+    return const UserRole.companyEmployee();
   }
 
   static UserRole fromString(String value) {
@@ -86,22 +80,15 @@ class UserRole with _$UserRole {
       case 'companyemployee':
       case 'company_employee':
         return const UserRole.companyEmployee();
-      // Legacy support
-      case 'owner':
-        return const UserRole.owner();
-      case 'manager':
-        return const UserRole.manager();
-      case 'employee':
-        return const UserRole.employee();
       default:
         return const UserRole.companyEmployee();
     }
   }
-  
+
   // Custom toJson to match Firestore format
   Map<String, dynamic> toJson() => {
-    'type': name,
-  };
+        'type': name,
+      };
 }
 
 extension UserRoleExtension on UserRole {
@@ -111,10 +98,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => 'company_admin',
         companyManager: () => 'company_manager',
         companyEmployee: () => 'company_employee',
-        // Legacy support
-        owner: () => 'owner',
-        manager: () => 'manager',
-        employee: () => 'employee',
       );
 
   bool get isAdmin => when(
@@ -123,10 +106,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => false,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get isPlatformRole => when(
@@ -135,10 +114,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => false,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canManageUsers => when(
@@ -147,10 +122,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => false,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canViewCompanies => when(
@@ -159,10 +130,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => false,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canManageCompanies => when(
@@ -171,10 +138,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => false,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canResetPasswords => when(
@@ -183,10 +146,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => true,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canCreateAccounts => when(
@@ -195,10 +154,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => true,
         companyManager: () => false,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => false,
-        manager: () => false,
-        employee: () => false,
       );
 
   bool get canManageCompanyUsers => when(
@@ -207,10 +162,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => true, // Only Admin da Empresa can manage company users
         companyManager: () => false, // Gerente MUST NOT have access to managing users
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => true,
-        manager: () => false,
-        employee: () => false,
       );
 
   String get displayName => when(
@@ -219,10 +170,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => 'Admin da Empresa',
         companyManager: () => 'Gerente',
         companyEmployee: () => 'Funcionário',
-        // Legacy support
-        owner: () => 'Proprietário',
-        manager: () => 'Gerente',
-        employee: () => 'Funcionário',
       );
 
   bool get canManageProducts => when(
@@ -231,10 +178,6 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => true,
         companyManager: () => true,
         companyEmployee: () => true,
-        // Legacy support
-        owner: () => true,
-        manager: () => true,
-        employee: () => true,
       );
 
   bool get canViewReports => when(
@@ -243,22 +186,18 @@ extension UserRoleExtension on UserRole {
         companyAdmin: () => true,
         companyManager: () => true,
         companyEmployee: () => false,
-        // Legacy support
-        owner: () => true,
-        manager: () => true,
-        employee: () => false,
       );
 }
 
 extension UserModelExtension on UserModel {
   bool get isInitialAdmin => metadata['isInitialAdmin'] == true;
-  
+
   bool get canDeleteAdmins => role.isAdmin && isInitialAdmin;
-  
+
   bool get canBeDeleted => role.isAdmin ? !isInitialAdmin : true;
-  
+
   bool get canManageOtherAdmins => role.isAdmin && isInitialAdmin;
-  
+
   String get roleDisplayName {
     if (role.isAdmin && isInitialAdmin) {
       return '${role.displayName} (Master)';

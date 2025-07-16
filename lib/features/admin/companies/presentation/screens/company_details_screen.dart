@@ -3,35 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/themes/app_theme.dart';
-import '../../../../../core/models/user_model.dart';
 import '../../../../../core/models/business_model.dart';
-import '../../../../../shared/widgets/shared_header.dart';
-import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../core/models/user_model.dart';
 import '../../../../../shared/utils/brazilian_validators.dart';
+import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../shared/widgets/shared_header.dart';
 import '../../../../auth/services/auth_service.dart';
 import '../providers/companies_providers.dart';
-import '../widgets/company_users_tab.dart';
 
 class CompanyDetailsScreen extends ConsumerStatefulWidget {
   final String companyId;
-  final String? initialTab;
-  
+
   const CompanyDetailsScreen({
     super.key,
     required this.companyId,
-    this.initialTab,
   });
 
   @override
   ConsumerState<CompanyDetailsScreen> createState() => _CompanyDetailsScreenState();
 }
 
-class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
+
   // Form controllers
   final _nameController = TextEditingController();
   final _cnpjController = TextEditingController();
@@ -41,7 +36,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
   final _zipCodeController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  
+
   BusinessType? _businessType;
   BusinessStatus? _businessStatus;
   String? _selectedState;
@@ -50,19 +45,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
   Business? _originalBusiness;
 
   @override
-  void initState() {
-    super.initState();
-    // Always 2 tabs in ERP admin interface (Details and Users)
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      // Force rebuild when tab changes to update menu
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
   void dispose() {
-    _tabController.dispose();
     _nameController.dispose();
     _cnpjController.dispose();
     _fantasyNameController.dispose();
@@ -88,21 +71,12 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
     _businessType = business.type;
     _businessStatus = business.status;
     _selectedState = business.state;
-    
-    // Set initial tab based on URL parameter
-    if (widget.initialTab == 'users') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _tabController.length > 1) {
-          _tabController.index = 1;
-        }
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -110,7 +84,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
     }
 
     final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
-    
+
     return firestoreUser.when(
       data: (user) => _buildScreen(context, user ?? currentUser),
       loading: () => const Scaffold(
@@ -154,56 +128,12 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                 onNotificationTap: () => _showComingSoon(context, 'Notificações'),
                 showBackButton: true,
                 fallbackRoute: '/admin/companies',
-                actions: MediaQuery.sizeOf(context).width <= 768 && canEdit 
+                actions: MediaQuery.sizeOf(context).width <= 768 && canEdit
                     ? [_buildMobileActionsMenu(context, business)]
                     : null,
               ),
               Expanded(
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        tabs: const [
-                          Tab(
-                            icon: Icon(Icons.business),
-                            text: 'Detalhes',
-                          ),
-                          Tab(
-                            icon: Icon(Icons.people),
-                            text: 'Usuários',
-                          ),
-                        ],
-                        labelColor: AppTheme.primaryColor,
-                        unselectedLabelColor: AppTheme.neutralGray,
-                        indicatorColor: AppTheme.primaryColor,
-                      ),
-                    ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildDetailsTab(context, currentUser, business),
-                          CompanyUsersTab(
-                            companyId: widget.companyId,
-                            company: business,
-                            canEdit: currentUser.role.canManageCompanies,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                child: _buildDetailsContent(context, currentUser, business),
               ),
             ],
           ),
@@ -216,9 +146,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
     );
   }
 
-  Widget _buildDetailsTab(BuildContext context, UserModel currentUser, Business business) {
+  Widget _buildDetailsContent(BuildContext context, UserModel currentUser, Business business) {
     final canEdit = currentUser.role.canManageCompanies;
-    
+
     return SingleChildScrollView(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
@@ -241,9 +171,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                           child: Text(
                             'Informações da Empresa',
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: AppTheme.primaryColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                         if (canEdit && MediaQuery.sizeOf(context).width > 768) ...[
@@ -305,15 +235,17 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                 // Business Type Selection
                 BrazilianFormFields.businessTypeField(
                   value: _businessType ?? business.type,
-                  onChanged: _isEditing ? (type) {
-                    setState(() {
-                      _businessType = type;
-                      if (!type.requiresCnpj) {
-                        _cnpjController.clear();
-                        _fantasyNameController.clear();
-                      }
-                    });
-                  } : (_) {},
+                  onChanged: _isEditing
+                      ? (type) {
+                          setState(() {
+                            _businessType = type;
+                            if (!type.requiresCnpj) {
+                              _cnpjController.clear();
+                              _fantasyNameController.clear();
+                            }
+                          });
+                        }
+                      : (_) {},
                 ),
 
                 const SizedBox(height: 24),
@@ -325,41 +257,45 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                   hintText: 'Nome oficial ou razão social',
                   prefixIcon: Icons.business,
                   enabled: _isEditing,
-                  validator: _isEditing ? (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Nome da empresa é obrigatório';
-                    }
-                    if (value.trim().length < 3) {
-                      return 'Nome deve ter pelo menos 3 caracteres';
-                    }
-                    return null;
-                  } : null,
+                  validator: _isEditing
+                      ? (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Nome da empresa é obrigatório';
+                          }
+                          if (value.trim().length < 3) {
+                            return 'Nome deve ter pelo menos 3 caracteres';
+                          }
+                          return null;
+                        }
+                      : null,
                 ),
 
                 const SizedBox(height: 16),
 
                 // CNPJ (only for formal companies)
-                if ((_businessType ?? business.type).requiresCnpj) ...[ 
+                if ((_businessType ?? business.type).requiresCnpj) ...[
                   BrazilianFormFields.cnpjField(
                     controller: _cnpjController,
                     enabled: _isEditing,
-                    validator: _isEditing ? (value) {
-                      if ((_businessType ?? business.type).requiresCnpj) {
-                        if (value == null || value.isEmpty) {
-                          return 'CNPJ é obrigatório para empresas formais';
-                        }
-                        if (!BrazilianValidators.isValidCnpj(value)) {
-                          return 'CNPJ inválido';
-                        }
-                      }
-                      return null;
-                    } : null,
+                    validator: _isEditing
+                        ? (value) {
+                            if ((_businessType ?? business.type).requiresCnpj) {
+                              if (value == null || value.isEmpty) {
+                                return 'CNPJ é obrigatório para empresas formais';
+                              }
+                              if (!BrazilianValidators.isValidCnpj(value)) {
+                                return 'CNPJ inválido';
+                              }
+                            }
+                            return null;
+                          }
+                        : null,
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Fantasy Name (only for formal companies)
-                if ((_businessType ?? business.type).requiresCnpj) ...[ 
+                if ((_businessType ?? business.type).requiresCnpj) ...[
                   BrazilianFormFields.textField(
                     controller: _fantasyNameController,
                     labelText: 'Nome Fantasia',
@@ -374,9 +310,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                 Text(
                   'Informações de Contato',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -392,14 +328,16 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                 BrazilianFormFields.emailField(
                   controller: _emailController,
                   enabled: _isEditing,
-                  validator: _isEditing ? (value) {
-                    if (value != null && value.isNotEmpty) {
-                      if (!BrazilianValidators.isValidEmail(value)) {
-                        return 'E-mail inválido';
-                      }
-                    }
-                    return null;
-                  } : null,
+                  validator: _isEditing
+                      ? (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (!BrazilianValidators.isValidEmail(value)) {
+                              return 'E-mail inválido';
+                            }
+                          }
+                          return null;
+                        }
+                      : null,
                 ),
 
                 const SizedBox(height: 24),
@@ -408,9 +346,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                 Text(
                   'Endereço',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -430,12 +368,14 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                   prefixIcon: Icons.location_on,
                   maxLines: 2,
                   enabled: _isEditing,
-                  validator: _isEditing ? (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Endereço é obrigatório';
-                    }
-                    return null;
-                  } : null,
+                  validator: _isEditing
+                      ? (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Endereço é obrigatório';
+                          }
+                          return null;
+                        }
+                      : null,
                 ),
 
                 const SizedBox(height: 16),
@@ -450,21 +390,25 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                             hintText: 'Nome da cidade',
                             prefixIcon: Icons.location_city,
                             enabled: _isEditing,
-                            validator: _isEditing ? (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Cidade é obrigatória';
-                              }
-                              return null;
-                            } : null,
+                            validator: _isEditing
+                                ? (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Cidade é obrigatória';
+                                    }
+                                    return null;
+                                  }
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           BrazilianFormFields.stateDropdownField(
                             value: _selectedState,
-                            onChanged: _isEditing ? (value) {
-                              setState(() {
-                                _selectedState = value;
-                              });
-                            } : (_) {},
+                            onChanged: _isEditing
+                                ? (value) {
+                                    setState(() {
+                                      _selectedState = value;
+                                    });
+                                  }
+                                : (_) {},
                           ),
                         ],
                       )
@@ -478,23 +422,27 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                               hintText: 'Nome da cidade',
                               prefixIcon: Icons.location_city,
                               enabled: _isEditing,
-                              validator: _isEditing ? (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Cidade é obrigatória';
-                                }
-                                return null;
-                              } : null,
+                              validator: _isEditing
+                                  ? (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Cidade é obrigatória';
+                                      }
+                                      return null;
+                                    }
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: BrazilianFormFields.stateDropdownField(
                               value: _selectedState,
-                              onChanged: _isEditing ? (value) {
-                                setState(() {
-                                  _selectedState = value;
-                                });
-                              } : (_) {},
+                              onChanged: _isEditing
+                                  ? (value) {
+                                      setState(() {
+                                        _selectedState = value;
+                                      });
+                                    }
+                                  : (_) {},
                             ),
                           ),
                         ],
@@ -507,9 +455,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
                   Text(
                     'Status da Empresa',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<BusinessStatus>(
@@ -563,9 +511,9 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
             Text(
               'Informações do Sistema',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppTheme.neutralGray,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: AppTheme.neutralGray,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             _buildMetadataRow('ID:', business.id),
@@ -637,26 +585,24 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
     try {
       final updatedBusiness = _originalBusiness!.copyWith(
         name: _nameController.text.trim(),
-        cnpj: (_businessType ?? _originalBusiness!.type).requiresCnpj 
-            ? _cnpjController.text.replaceAll(RegExp(r'[^0-9]'), '') 
+        cnpj: (_businessType ?? _originalBusiness!.type).requiresCnpj
+            ? _cnpjController.text.replaceAll(RegExp(r'[^0-9]'), '')
             : null,
-        fantasyName: _fantasyNameController.text.trim().isNotEmpty 
-            ? _fantasyNameController.text.trim() 
+        fantasyName: _fantasyNameController.text.trim().isNotEmpty
+            ? _fantasyNameController.text.trim()
             : null,
         address: _addressController.text.trim(),
         city: _cityController.text.trim(),
         state: _selectedState!,
         zipCode: _zipCodeController.text.replaceAll(RegExp(r'[^0-9]'), ''),
         phone: _phoneController.text.replaceAll(RegExp(r'[^0-9]'), ''),
-        email: _emailController.text.trim().isNotEmpty 
-            ? _emailController.text.trim() 
-            : null,
+        email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : null,
         type: _businessType ?? _originalBusiness!.type,
         status: _businessStatus ?? _originalBusiness!.status,
       );
 
       await ref.read(companiesRepositoryProvider).updateBusiness(updatedBusiness);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -664,11 +610,11 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
             backgroundColor: AppTheme.successColor,
           ),
         );
-        
+
         setState(() {
           _isEditing = false;
         });
-        
+
         // Refresh the business data
         ref.invalidate(businessProvider(widget.companyId));
       }
@@ -729,7 +675,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
 
     try {
       await ref.read(companiesRepositoryProvider).deleteBusiness(_originalBusiness!.id);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -737,7 +683,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
             backgroundColor: AppTheme.successColor,
           ),
         );
-        
+
         context.go('/admin/companies');
       }
     } catch (e) {
@@ -782,7 +728,7 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/dashboard'),
+              onPressed: () => context.go('/'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],
@@ -869,62 +815,48 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
       onSelected: (value) => _handleMenuAction(value, context),
       itemBuilder: (context) {
         List<PopupMenuEntry<String>> items = [];
-        
-        if (_tabController.index == 0) {
-          // Company Details Tab
-          if (_isEditing) {
-            items.addAll([
-              const PopupMenuItem(
-                value: 'save',
-                child: ListTile(
-                  leading: Icon(Icons.save),
-                  title: Text('Salvar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'cancel',
-                child: ListTile(
-                  leading: Icon(Icons.cancel),
-                  title: Text('Cancelar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ]);
-          } else {
-            items.addAll([
-              const PopupMenuItem(
-                value: 'edit',
-                child: ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text('Editar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                  leading: Icon(Icons.delete_outline, color: AppTheme.errorColor),
-                  title: Text('Excluir', style: TextStyle(color: AppTheme.errorColor)),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ]);
-          }
-        } else {
-          // Company Users Tab
-          items.add(
+
+        // Company Details actions only
+        if (_isEditing) {
+          items.addAll([
             const PopupMenuItem(
-              value: 'add_user',
+              value: 'save',
               child: ListTile(
-                leading: Icon(Icons.person_add),
-                title: Text('Adicionar Usuário'),
+                leading: Icon(Icons.save),
+                title: Text('Salvar'),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
-          );
+            const PopupMenuItem(
+              value: 'cancel',
+              child: ListTile(
+                leading: Icon(Icons.cancel),
+                title: Text('Cancelar'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ]);
+        } else {
+          items.addAll([
+            const PopupMenuItem(
+              value: 'edit',
+              child: ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('Editar'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'delete',
+              child: ListTile(
+                leading: Icon(Icons.delete_outline, color: AppTheme.errorColor),
+                title: Text('Excluir', style: TextStyle(color: AppTheme.errorColor)),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ]);
         }
-        
+
         return items;
       },
     );
@@ -943,9 +875,6 @@ class _CompanyDetailsScreenState extends ConsumerState<CompanyDetailsScreen>
         break;
       case 'delete':
         _confirmDelete(context);
-        break;
-      case 'add_user':
-        context.go('/admin/companies/${widget.companyId}/users/create');
         break;
     }
   }

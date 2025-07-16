@@ -8,23 +8,25 @@ import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/shared_header.dart';
 import '../../auth/services/auth_service.dart';
 import '../../auth/utils/auth_validators.dart';
-import '../services/admin_user_service.dart';
+import '../services/company_user_service.dart';
 
-class CreateUserScreen extends ConsumerStatefulWidget {
-  const CreateUserScreen({super.key});
+class CreateCompanyUserScreen extends ConsumerStatefulWidget {
+  final String? companyId; // For ERP admins accessing specific company
+
+  const CreateCompanyUserScreen({super.key, this.companyId});
 
   @override
-  ConsumerState<CreateUserScreen> createState() => _CreateUserScreenState();
+  ConsumerState<CreateCompanyUserScreen> createState() => _CreateCompanyUserScreenState();
 }
 
-class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
+class _CreateCompanyUserScreenState extends ConsumerState<CreateCompanyUserScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  UserRole _selectedRole = const UserRole.viewer();
+  UserRole _selectedRole = const UserRole.companyEmployee();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -60,7 +62,12 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
   }
 
   Widget _buildScreen(BuildContext context, UserModel currentUser) {
-    if (!currentUser.role.isAdmin) {
+    if (!currentUser.role.canManageCompanyUsers) {
+      return _buildAccessDenied(context);
+    }
+
+    // For company users, they must have a businessId; ERP admins can access any company
+    if (!currentUser.role.isAdmin && currentUser.businessId == null) {
       return _buildAccessDenied(context);
     }
 
@@ -70,12 +77,12 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
         children: [
           ScreenHeader(
             user: currentUser,
-            title: 'Criar Usuário',
-            subtitle: 'Adicione um novo usuário ao sistema',
+            title: 'Criar Usuário da Empresa',
+            subtitle: 'Adicione um novo usuário à sua empresa',
             onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
             onNotificationTap: () => _showComingSoon(context, 'Notificações'),
             showBackButton: true,
-            fallbackRoute: '/admin/users',
+            fallbackRoute: widget.companyId != null ? '/company/${widget.companyId}/users' : '/',
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -150,14 +157,19 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
                               isExpanded: true,
                               items: [
                                 DropdownMenuItem(
-                                  value: const UserRole.viewer(),
-                                  child: _buildRoleItem(const UserRole.viewer(),
-                                      'Apenas visualização de relatórios do sistema'),
+                                  value: const UserRole.companyAdmin(),
+                                  child: _buildRoleItem(const UserRole.companyAdmin(),
+                                      'Acesso total de gerenciamento da empresa'),
                                 ),
                                 DropdownMenuItem(
-                                  value: const UserRole.admin(),
-                                  child: _buildRoleItem(
-                                      const UserRole.admin(), 'Controle total do sistema'),
+                                  value: const UserRole.companyManager(),
+                                  child: _buildRoleItem(const UserRole.companyManager(),
+                                      'Gerenciamento de operações e relatórios'),
+                                ),
+                                DropdownMenuItem(
+                                  value: const UserRole.companyEmployee(),
+                                  child: _buildRoleItem(const UserRole.companyEmployee(),
+                                      'Acesso operacional básico'),
                                 ),
                               ],
                               onChanged: (value) {
@@ -311,7 +323,7 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/admin/dashboard'),
+              onPressed: () => context.go('/'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],
@@ -325,16 +337,46 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
       return;
     }
 
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: usuário não autenticado'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+      return;
+    }
+
+    // Get business ID from current user or widget parameter (for ERP admins)
+    String? businessId;
+    if (currentUser.role.isAdmin) {
+      businessId = widget.companyId;
+    } else {
+      businessId = currentUser.businessId;
+    }
+
+    if (businessId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: empresa não identificada'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      await ref.read(adminUserServiceProvider).createUser(
+      await ref.read(companyUserServiceProvider).createCompanyUser(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             displayName: _displayNameController.text.trim(),
             role: _selectedRole,
+            businessId: businessId,
           );
 
       if (mounted) {
@@ -355,10 +397,15 @@ class _CreateUserScreenState extends ConsumerState<CreateUserScreen> {
         );
 
         // Invalidate users list to refresh data
-        ref.invalidate(allUsersProvider);
+        ref.invalidate(companyUsersStreamProvider);
 
-        // Navigate back to admin users screen using go_router
-        context.go('/admin/users');
+        // Navigate back to company users screen (unified route for all users)
+        if (widget.companyId != null) {
+          context.go('/company/${widget.companyId}/users');
+        } else {
+          // Fallback to dashboard if no company ID
+          context.go('/');
+        }
       }
     } catch (error) {
       if (mounted) {

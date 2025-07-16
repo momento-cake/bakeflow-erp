@@ -96,7 +96,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
             onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
             onNotificationTap: () => _showComingSoon(context, 'Notificações'),
             showBackButton: true,
-            fallbackRoute: '/dashboard',
+            fallbackRoute: '/admin/dashboard',
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -197,8 +197,8 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
                       final business = paginatedBusinesses[index];
                       return CompanyCard(
                         business: business,
-                        onTap: () => context.go('/company/${business.id}/dashboard'),
-                        onEdit: () => context.go('/admin/companies/${business.id}/edit'),
+                        onTap: () => context.go('/company/${business.id}'),
+                        onEdit: () => context.go('/company/${business.id}/details'),
                         onDelete: () => _showDeleteConfirmation(context, business),
                         canEdit: true,
                         canDelete: true,
@@ -474,7 +474,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/dashboard'),
+              onPressed: () => context.go('/admin/dashboard'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app/themes/app_theme.dart';
 import '../../core/models/business_model.dart';
 
@@ -45,17 +46,17 @@ class CompanyCard extends StatelessWidget {
                         Text(
                           business.name,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                         if (business.fantasyName != null) ...[
                           const SizedBox(height: 2),
                           Text(
                             business.fantasyName!,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.neutralGray,
-                              fontStyle: FontStyle.italic,
-                            ),
+                                  color: AppTheme.neutralGray,
+                                  fontStyle: FontStyle.italic,
+                                ),
                           ),
                         ],
                       ],
@@ -68,16 +69,16 @@ class CompanyCard extends StatelessWidget {
                   ],
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Company details
               _buildDetailRow(
                 icon: Icons.business,
                 label: business.type.displayName,
                 color: _getTypeColor(business.type),
               ),
-              
+
               if (business.cnpj != null) ...[
                 const SizedBox(height: 8),
                 _buildDetailRow(
@@ -85,19 +86,19 @@ class CompanyCard extends StatelessWidget {
                   label: 'CNPJ: ${business.cnpj}',
                 ),
               ],
-              
+
               const SizedBox(height: 8),
               _buildDetailRow(
                 icon: Icons.location_on,
                 label: '${business.city}, ${business.state}',
               ),
-              
+
               const SizedBox(height: 8),
               _buildDetailRow(
                 icon: Icons.phone,
                 label: business.phone,
               ),
-              
+
               if (business.email != null) ...[
                 const SizedBox(height: 8),
                 _buildDetailRow(
@@ -105,9 +106,9 @@ class CompanyCard extends StatelessWidget {
                   label: business.email!,
                 ),
               ],
-              
+
               const SizedBox(height: 12),
-              
+
               // Footer with creation date
               Row(
                 children: [
@@ -120,15 +121,15 @@ class CompanyCard extends StatelessWidget {
                   Text(
                     'Criado em ${_formatDate(business.createdAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.neutralGray,
-                    ),
+                          color: AppTheme.neutralGray,
+                        ),
                   ),
                   const Spacer(),
                   Text(
                     '${business.authorizedUsers.length} usuários',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.neutralGray,
-                    ),
+                          color: AppTheme.neutralGray,
+                        ),
                   ),
                 ],
               ),

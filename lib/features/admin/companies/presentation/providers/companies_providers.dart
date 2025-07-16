@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../../../core/models/business_model.dart';
 import '../../../../../core/models/company_user_model.dart';
 import '../../data/repositories/companies_repository.dart';
@@ -29,7 +29,8 @@ final companyUsersProvider = StreamProvider.family<List<CompanyUser>, String>((r
   return ref.read(companiesRepositoryProvider).getCompanyUsers(businessId);
 });
 
-final companyUserProvider = FutureProvider.family<CompanyUser?, ({String businessId, String userId})>((ref, params) {
+final companyUserProvider =
+    FutureProvider.family<CompanyUser?, ({String businessId, String userId})>((ref, params) {
   return ref.read(companiesRepositoryProvider).getCompanyUserById(params.businessId, params.userId);
 });
 
@@ -38,7 +39,8 @@ final businessSearchProvider = StreamProvider.family<List<Business>, String>((re
   return ref.read(companiesRepositoryProvider).searchBusinesses(query);
 });
 
-final companyUsersSearchProvider = StreamProvider.family<List<CompanyUser>, ({String businessId, String query})>((ref, params) {
+final companyUsersSearchProvider =
+    StreamProvider.family<List<CompanyUser>, ({String businessId, String query})>((ref, params) {
   return ref.read(companiesRepositoryProvider).searchCompanyUsers(params.businessId, params.query);
 });
 
@@ -47,7 +49,8 @@ final businessesByTypeProvider = StreamProvider.family<List<Business>, BusinessT
   return ref.read(companiesRepositoryProvider).getBusinessesByType(type);
 });
 
-final businessesByStatusProvider = StreamProvider.family<List<Business>, BusinessStatus>((ref, status) {
+final businessesByStatusProvider =
+    StreamProvider.family<List<Business>, BusinessStatus>((ref, status) {
   return ref.read(companiesRepositoryProvider).getBusinessesByStatus(status);
 });
 
@@ -267,11 +270,11 @@ class CreateBusinessFormState {
 
   bool get isValid {
     return name.isNotEmpty &&
-           address.isNotEmpty &&
-           city.isNotEmpty &&
-           state.isNotEmpty &&
-           zipCode.isNotEmpty &&
-           phone.isNotEmpty &&
-           (businessType.requiresCnpj ? (cnpj?.isNotEmpty ?? false) : true);
+        address.isNotEmpty &&
+        city.isNotEmpty &&
+        state.isNotEmpty &&
+        zipCode.isNotEmpty &&
+        phone.isNotEmpty &&
+        (businessType.requiresCnpj ? (cnpj?.isNotEmpty ?? false) : true);
   }
 }

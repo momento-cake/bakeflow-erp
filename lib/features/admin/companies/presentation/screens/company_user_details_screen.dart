@@ -5,19 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/themes/app_theme.dart';
-import '../../../../../core/models/user_model.dart';
 import '../../../../../core/models/business_model.dart';
 import '../../../../../core/models/company_user_model.dart';
-import '../../../../../shared/widgets/shared_header.dart';
-import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../core/models/user_model.dart';
 import '../../../../../shared/utils/brazilian_validators.dart';
+import '../../../../../shared/widgets/brazilian_form_fields.dart';
+import '../../../../../shared/widgets/shared_header.dart';
 import '../../../../auth/services/auth_service.dart';
 import '../providers/companies_providers.dart';
 
 class CompanyUserDetailsScreen extends ConsumerStatefulWidget {
   final String companyId;
   final String userId;
-  
+
   const CompanyUserDetailsScreen({
     super.key,
     required this.companyId,
@@ -31,12 +31,12 @@ class CompanyUserDetailsScreen extends ConsumerStatefulWidget {
 class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
+
   // Form controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   UserRole? _selectedRole;
   bool? _isActive;
   bool _isLoading = false;
@@ -64,7 +64,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -72,7 +72,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
     }
 
     final firestoreUser = ref.watch(firestoreUserProvider(currentUser.uid));
-    
+
     return firestoreUser.when(
       data: (user) => _buildScreen(context, user ?? currentUser),
       loading: () => const Scaffold(
@@ -87,7 +87,8 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
       return _buildAccessDenied(context);
     }
 
-    final userAsync = ref.watch(companyUserProvider((businessId: widget.companyId, userId: widget.userId)));
+    final userAsync =
+        ref.watch(companyUserProvider((businessId: widget.companyId, userId: widget.userId)));
     final businessAsync = ref.watch(businessProvider(widget.companyId));
 
     return userAsync.when(
@@ -116,7 +117,8 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
     );
   }
 
-  Widget _buildContent(BuildContext context, UserModel currentUser, CompanyUser companyUser, Business? business) {
+  Widget _buildContent(
+      BuildContext context, UserModel currentUser, CompanyUser companyUser, Business? business) {
     final canEdit = currentUser.role.canManageCompanies;
 
     return Scaffold(
@@ -130,7 +132,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             onProfileTap: () => _showComingSoon(context, 'Menu do usuário'),
             onNotificationTap: () => _showComingSoon(context, 'Notificações'),
             showBackButton: true,
-            fallbackRoute: '/admin/companies/${widget.companyId}',
+            fallbackRoute: '/company/${widget.companyId}',
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -144,7 +146,8 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
     );
   }
 
-  Widget _buildForm(BuildContext context, UserModel currentUser, CompanyUser companyUser, bool canEdit) {
+  Widget _buildForm(
+      BuildContext context, UserModel currentUser, CompanyUser companyUser, bool canEdit) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -160,9 +163,9 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                   Text(
                     'Informações do Usuário',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   if (canEdit) ...[
                     Row(
@@ -235,15 +238,17 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                 hintText: 'Nome e sobrenome do usuário',
                 prefixIcon: Icons.person,
                 enabled: _isEditing,
-                validator: _isEditing ? (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nome é obrigatório';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Nome deve ter pelo menos 3 caracteres';
-                  }
-                  return null;
-                } : null,
+                validator: _isEditing
+                    ? (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nome é obrigatório';
+                        }
+                        if (value.trim().length < 3) {
+                          return 'Nome deve ter pelo menos 3 caracteres';
+                        }
+                        return null;
+                      }
+                    : null,
               ),
 
               const SizedBox(height: 16),
@@ -252,15 +257,17 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
               BrazilianFormFields.emailField(
                 controller: _emailController,
                 enabled: _isEditing,
-                validator: _isEditing ? (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'E-mail é obrigatório';
-                  }
-                  if (!BrazilianValidators.isValidEmail(value)) {
-                    return 'E-mail inválido';
-                  }
-                  return null;
-                } : null,
+                validator: _isEditing
+                    ? (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'E-mail é obrigatório';
+                        }
+                        if (!BrazilianValidators.isValidEmail(value)) {
+                          return 'E-mail inválido';
+                        }
+                        return null;
+                      }
+                    : null,
               ),
 
               const SizedBox(height: 16),
@@ -277,9 +284,9 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
               Text(
                 'Função na Empresa',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 16),
 
@@ -301,8 +308,8 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                         Text(
                           'Acesso completo à empresa',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.neutralGray,
-                          ),
+                                color: AppTheme.neutralGray,
+                              ),
                         ),
                       ],
                     ),
@@ -317,8 +324,8 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                         Text(
                           'Gerenciamento de operações',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.neutralGray,
-                          ),
+                                color: AppTheme.neutralGray,
+                              ),
                         ),
                       ],
                     ),
@@ -333,20 +340,22 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                         Text(
                           'Acesso básico às funcionalidades',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.neutralGray,
-                          ),
+                                color: AppTheme.neutralGray,
+                              ),
                         ),
                       ],
                     ),
                   ),
                 ],
-                onChanged: _isEditing ? (role) {
-                  if (role != null) {
-                    setState(() {
-                      _selectedRole = role;
-                    });
-                  }
-                } : null,
+                onChanged: _isEditing
+                    ? (role) {
+                        if (role != null) {
+                          setState(() {
+                            _selectedRole = role;
+                          });
+                        }
+                      }
+                    : null,
               ),
 
               const SizedBox(height: 24),
@@ -356,12 +365,11 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                 Text(
                   'Status do Usuário',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 16),
-                
                 SwitchListTile(
                   value: _isActive ?? companyUser.isActive,
                   onChanged: (value) {
@@ -369,14 +377,15 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
                       _isActive = value;
                     });
                   },
-                  title: Text(_isActive ?? companyUser.isActive ? 'Usuário Ativo' : 'Usuário Inativo'),
+                  title:
+                      Text(_isActive ?? companyUser.isActive ? 'Usuário Ativo' : 'Usuário Inativo'),
                   subtitle: Text(
-                    (_isActive ?? companyUser.isActive) 
+                    (_isActive ?? companyUser.isActive)
                         ? 'O usuário pode acessar a empresa'
                         : 'O usuário não pode acessar a empresa',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.neutralGray,
-                    ),
+                          color: AppTheme.neutralGray,
+                        ),
                   ),
                   activeColor: AppTheme.successColor,
                   contentPadding: EdgeInsets.zero,
@@ -404,9 +413,9 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             Text(
               'Informações do Sistema',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppTheme.neutralGray,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: AppTheme.neutralGray,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             _buildMetadataRow('ID:', user.id),
@@ -487,7 +496,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
       );
 
       await ref.read(companiesRepositoryProvider).updateCompanyUser(widget.companyId, updatedUser);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -495,11 +504,11 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             backgroundColor: AppTheme.successColor,
           ),
         );
-        
+
         setState(() {
           _isEditing = false;
         });
-        
+
         // Refresh the user data
         ref.invalidate(companyUserProvider((businessId: widget.companyId, userId: widget.userId)));
       }
@@ -560,7 +569,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
 
     try {
       await ref.read(companiesRepositoryProvider).resetCompanyUserPassword(_originalUser!.email);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -622,7 +631,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
 
     // Use a stable context reference
     final scaffoldContext = context;
-    
+
     // Show loading dialog with timeout protection
     showDialog(
       context: scaffoldContext,
@@ -641,18 +650,21 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
 
     try {
       // Perform soft delete with timeout
-      await ref.read(companiesRepositoryProvider).deleteCompanyUser(widget.companyId, _originalUser!.id).timeout(
+      await ref
+          .read(companiesRepositoryProvider)
+          .deleteCompanyUser(widget.companyId, _originalUser!.id)
+          .timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw Exception('Operação expirou. Tente novamente.');
         },
       );
-      
+
       // Close loading dialog safely
       if (scaffoldContext.mounted) {
         Navigator.of(scaffoldContext, rootNavigator: true).pop();
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -661,15 +673,15 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             duration: const Duration(seconds: 3),
           ),
         );
-        
-        context.go('/admin/companies/${widget.companyId}');
+
+        context.go('/company/${widget.companyId}');
       }
     } catch (e) {
       // Close loading dialog safely
       if (scaffoldContext.mounted) {
         Navigator.of(scaffoldContext, rootNavigator: true).pop();
       }
-      
+
       if (mounted) {
         final errorMessage = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -707,7 +719,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/dashboard'),
+              onPressed: () => context.go('/'),
               child: const Text('Voltar ao Dashboard'),
             ),
           ],
@@ -740,7 +752,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/admin/companies/${widget.companyId}'),
+              onPressed: () => context.go('/company/${widget.companyId}'),
               child: const Text('Voltar para Empresa'),
             ),
           ],
@@ -779,7 +791,7 @@ class _CompanyUserDetailsScreenState extends ConsumerState<CompanyUserDetailsScr
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.go('/admin/companies/${widget.companyId}'),
+              onPressed: () => context.go('/company/${widget.companyId}'),
               child: const Text('Voltar para Empresa'),
             ),
           ],
